@@ -1,5 +1,6 @@
 package fuzihao.test1;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -9,17 +10,24 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
+import android.util.FloatMath;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import fuzihao.test1.FileUtil;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
     private GLSurfaceView glsv_content;
     //使用OpenGL库创建一个材质(Texture)，首先是获取一个Texture Id。
     private int[] textures = new int[1];
@@ -27,35 +35,209 @@ public class MainActivity extends AppCompatActivity {
     private int radius = 3;
     private float move = 0.1f;
     private float angle = 0;
+    private float angle2 = 0;
     private ArrayList<FloatBuffer> mVertices = new ArrayList<FloatBuffer>();
     private ArrayList<FloatBuffer> mTextureCoords = new ArrayList<FloatBuffer>();
     private Bitmap mBitmap;
+
+    private ImageButton btnSetting;
+    private TextView txtTitle;
+    private ImageButton btnDay;
+
+    private Intent intent;
+
+    private int select = 0;
+    private String title = "";
+
+    private Float eyeX=0.0f;
+    private Float x = 0.0f;
+    private Float y = 0.0f;
+    private Float newx = 0.0f;
+    private Float newy = 0.0f;
+    private Float changex = 0.0f;
+    private Float changey = 0.0f;
+
+    private int mode = 0;
+    float oldDist;
+    float origin = 1.0f;
+    float zoom = 1.0f;
+
+    Timer timer = new Timer();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initView();
         // 计算球面顶点坐标
         getSphereVertices();
+
+        Intent intentFromSelect = getIntent();
+        select = intentFromSelect.getIntExtra("num",0);
         // 绑定地图
-        mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.world1);
+        if (select==0){
+            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe1);
+            title = "Geographic Globe";
+            txtTitle.setText(title);
+        }else if(select==1){
+            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe2);
+            title = "National Globe";
+            txtTitle.setText(title);
+        }else if(select==2){
+            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe3);
+            title = "Time Zone Globe";
+            txtTitle.setText(title);
+        }
+
         glsv_content = (GLSurfaceView)findViewById(R.id.glsv_content);
         glsv_content.setRenderer(new GLRender());
+        glsv_content.setOnTouchListener(this);
     }
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
+    public void onResume() {
+        super.onResume();
+        btnSetting.setVisibility(View.VISIBLE);
+        txtTitle.setVisibility(View.VISIBLE);
+        btnDay.setVisibility(View.VISIBLE);
+    }
+
+    private void initView(){
+        btnSetting=(ImageButton)findViewById(R.id.btnSetting);
+        txtTitle=(TextView) findViewById(R.id.txtTitle);
+        btnDay=(ImageButton)findViewById(R.id.btnDayAndNight);
+
+        btnSetting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intent=new Intent(MainActivity.this,Setting.class);
+                startActivity(intent);
+                btnSetting.setVisibility(View.INVISIBLE);
+                txtTitle.setVisibility(View.INVISIBLE);
+                btnDay.setVisibility(View.INVISIBLE);
+            }
+        });
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        switch (motionEvent.getAction()& MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 //有按下动作时暂停地球仪的旋转
+                mode = 1;
+                x = motionEvent.getX();
+                y = motionEvent.getY();
                 move=0;
                 break;
+            case MotionEvent.ACTION_MOVE:
+                if (mode >= 2) {
+                    float newDist = distance(motionEvent);
+                    if (newDist > oldDist + 1){
+                        zoom=(newDist / oldDist);
+                        origin = origin*zoom;
+                        oldDist = newDist;
+                    }else if(newDist < oldDist - 1){
+                        zoom=(newDist / oldDist);
+                        origin = origin*zoom;
+                        oldDist = newDist;
+                    }
+
+                }else{
+                    newx = motionEvent.getX();
+                    newy = motionEvent.getY();
+                    changex = -(newx-x);
+                    changey = (newy-y);
+                    angle = angle + changex/100;
+                    angle2 = angle2 + changey/100;
+                }
+
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        move=0.1f;
+                    }
+                },2000);
+
+                break;
             case MotionEvent.ACTION_UP:
+                mode = 0;
                 //抬起时地球仪继续旋转
-                move=0.1f;
+
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        move=0.1f;
+                    }
+                },2000);
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                mode -= 1;
+                move = 0f;
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                oldDist = distance(motionEvent);//两点按下时的距离
+                mode += 1;
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        move=0.1f;
+                    }
+                },2000);
                 break;
         }
-        return super.dispatchTouchEvent(ev);
+        return true;
+    }
+
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent ev) {
+//        switch (ev.getAction()& MotionEvent.ACTION_MASK) {
+//            case MotionEvent.ACTION_DOWN:
+//                //有按下动作时暂停地球仪的旋转
+//                mode = 1;
+//                x = ev.getX();
+//                y = ev.getY();
+//                move=0;
+//                break;
+//            case MotionEvent.ACTION_MOVE:
+//                if (mode >= 2) {
+//                    float newDist = distance(ev);
+//                    if (newDist > oldDist + 1){
+//                        zoom=(newDist / oldDist);
+//                        oldDist = newDist;
+//                    }else if(newDist < oldDist+1){
+//                        zoom=(newDist / oldDist);
+//                        oldDist = newDist;
+//                    }
+//
+//                }else{
+//                    newx = ev.getX();
+//                    newy = ev.getY();
+//                    float changex = -(newx-x);
+//                    float changey = (newy-y);
+//                }
+////                angle = changex;
+//                break;
+//            case MotionEvent.ACTION_UP:
+//                mode = 0;
+//                //抬起时地球仪继续旋转
+//                move=0.1f;
+//                break;
+//            case MotionEvent.ACTION_POINTER_UP:
+//                mode -= 1;
+//                break;
+//            case MotionEvent.ACTION_POINTER_DOWN:
+//                oldDist = distance(ev);//两点按下时的距离
+//                mode += 1;
+//                break;
+//        }
+//        return super.dispatchTouchEvent(ev);
+//    }
+
+    private float distance(MotionEvent event){
+        float x = event.getX(0) - event.getX(1);
+        float y = event.getY(0) - event.getY(1);
+        float dis = (float) Math.sqrt(x*x+y*y);
+        return dis;
     }
 
     @Override
@@ -108,6 +290,8 @@ public class MainActivity extends AppCompatActivity {
             mTextureCoords.add(FileUtil.getFloatBuffer(texCoords));
         }
     }
+
+
 
     private class GLRender implements GLSurfaceView.Renderer {
         @Override
@@ -170,9 +354,33 @@ public class MainActivity extends AppCompatActivity {
             //GLU.gluLookAt(gl, 0.0f, 70.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);//正上
             //GLU.gluLookAt(gl, 0.0f, -70.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);//正下
             //GLU.gluLookAt(gl, 0.0f, 30.0f, 60.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-            GLU.gluLookAt(gl, 0.0f, 0.0f, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+            if (angle2>=60){
+                GLU.gluLookAt(gl, 0.0f, 60f, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+            }else if (angle2<=-60){
+                GLU.gluLookAt(gl, 0.0f, -60.0f, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+            }else{
+                GLU.gluLookAt(gl, 0.0f, angle2, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+            }
 
-            gl.glRotatef(-angle, 0, 1, 0);  //设置旋转动画
+            //            gl.glTranslatef(changex,changey,0);
+//            if (changex!=0f){
+//                gl.glRotatef(-angle, 0, 1, 0);  //设置旋转动画
+//            }else if (changey!=0f){
+//                gl.glRotatef(-angle2, 1, 0, 0);  //设置旋转动画
+//            }else{
+                gl.glRotatef(-angle, 0, 1, 0);  //设置旋转动画
+//            }
+
+
+            if (origin>=3f){
+                gl.glScalef(3f,3f,3f);
+            }else if(origin<=0.5f){
+                gl.glScalef(0.5f,0.5f,0.5f);
+            }else
+            {
+                gl.glScalef(origin,origin,origin);
+            }
+
             //gl.glTranslatef(3, 0, 0);  //设置平移动画
             //gl.glRotatef(angle, 0, 0, -1);
             //gl.glRotatef(angle, 0, -1, 0);

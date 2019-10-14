@@ -1,3 +1,36 @@
 <resources>
-    <string name="app_name">TEST1</string>
+    <string name="app_name">Globe</string>
+    <string name="setting">Setting</string>
+    <string name="globe">Globes</string>
+    <string name="map">Maps</string>
+    <string name="dayAndNight">The Key Of Day And Night</string>
+    <string name="howToUse">How To Use</string>
+    <string name="info">Information</string>
+    <string name="title1">Please select an option</string>
+    <string name="geoGlobe">Geographic Globe</string>
+    <string name="nationGlobe">National Globe</string>
+    <string name="timeGlobe">Time Zone Globe</string>
+    <string name="worldMap">World Map</string>
+    <string name="asiaMap">Asia Map</string>
+    <string name="europeMap">Europe Map</string>
+    <string name="africaMap">Africa Map</string>
+    <string name="NAMap">North America Map</string>
+    <string name="SAMap">South America Map</string>
+    <string name="oceaniaMap">oceania Map</string>
+    <string name="antarcticaMap">antarctica Map</string>
+    <string name="author">Author: Fu Zihao</string>
+    <string name="version">Version: 1.0</string>
+    <string name="modifyTime">Modify Time: 10/10/2019</string>
+
+    <string name="introduction">Introduction</string>
+    <string name="introductionOfWorld">"The world is the planet Earth and all life on it, including human civilization. In a philosophical context, the "world" is the whole of the physical Universe, or an ontological world (the "world" of an individual). In a theological context, the world is the material or the profane sphere, as opposed to the celestial, spiritual, transcendent or sacred spheres. "End of the world" scenarios refer to the end of human history, often in religious contexts."</string>
+    <string name="introductionOfAsia">"Asia is Earth's largest and most populous continent, located primarily in the Eastern and Northern Hemispheres. It shares the continental landmass of Eurasia with the continent of Europe and the continental landmass of Afro-Eurasia with both Europe and Africa. Asia covers an area of 44,579,000 square kilometres (17,212,000 sq mi), about 30% of Earth's total land area and 8.7% of the Earth\'s total surface area. The continent, which has long been home to the majority of the human population, was the site of many of the first civilizations. Asia is notable for not only its overall large size and population, but also dense and large settlements, as well as vast barely populated regions. Its 4.5 billion people (as of June 2019) constitute roughly 60% of the world's population."</string>
+    <string name="introductionOfEurope">"Europe is a continent located entirely in the Northern Hemisphere and mostly in the Eastern Hemisphere. It is bordered by the Arctic Ocean to the north, the Atlantic Ocean to the west, Asia to the east, and the Mediterranean Sea to the south. It comprises the westernmost part of Eurasia."</string>
+    <string name="introductionOfAfrica">"Africa is the world's second largest and second most-populous continent. At about 30.3 million km2 (11.7 million square miles) including adjacent islands, it covers 6% of Earth's total surface area and 20% of its land area. With 1.2 billion people as of 2016, it accounts for about 16% of the world's human population. The continent is surrounded by the Mediterranean Sea to the north, the Isthmus of Suez and the Red Sea to the northeast, the Indian Ocean to the southeast and the Atlantic Ocean to the west. The continent includes Madagascar and various archipelagos. It contains 54 fully recognised sovereign states (countries), nine territories and two de facto independent states with limited or no recognition. The majority of the continent and its countries are in the Northern Hemisphere, with a substantial portion and number of countries in the Southern Hemisphere."</string>
+    <string name="introductionOfNA">"North America is a continent entirely within the Northern Hemisphere and almost all within the Western Hemisphere. It is also considered by some to be a northern subcontinent of the Americas. It is bordered to the north by the Arctic Ocean, to the east by the Atlantic Ocean, to the west and south by the Pacific Ocean, and to the southeast by South America and the Caribbean Sea.</string>
+    <string name="introductionOfSA">"South America is a continent in the Western Hemisphere, mostly in the Southern Hemisphere, with a relatively small portion in the Northern Hemisphere. It may also be considered a subcontinent of the Americas, which is how it is viewed in the Spanish and Portuguese-speaking regions of the Americas. The reference to South America instead of other regions (like Latin America or the Southern Cone) has increased in the last decades due to changing geopolitical dynamics (in particular, the rise of Brazil)."</string>
+    <string name="introductionOfOceania">"Oceania is a geographic region that includes Australasia, Melanesia, Micronesia and Polynesia. Spanning the eastern and western hemispheres, Oceania has a land area of 8,525,989 square kilometres (3,291,903 sq mi) and a population of 40 million. Situated in the southeast of the Asia-Pacific region, Oceania, when compared to continental regions, is the smallest in land area and the second smallest in population after Antarctica."</string>
+    <string name="introductionOfAntarctica">"Antarctica is Earth's southernmost continent. It contains the geographic South Pole and is situated in the Antarctic region of the Southern Hemisphere, almost entirely south of the Antarctic Circle, and is surrounded by the Southern Ocean. At 14,200,000 square kilometres (5,500,000 square miles), it is the fifth-largest continent and nearly twice the size of Australia. At 0.00008 people per square kilometre, it is by far the least densely populated continent. About 98% of Antarctica is covered by ice that averages 1.9 km (1.2 mi; 6,200 ft) in thickness, which extends to all but the northernmost reaches of the Antarctic Peninsula."</string>
+
+    <string name="link">Link to Wikipedia</string>
 </resources>
