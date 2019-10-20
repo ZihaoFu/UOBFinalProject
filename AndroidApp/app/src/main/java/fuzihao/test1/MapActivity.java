@@ -2,18 +2,23 @@ package fuzihao.test1;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.PointF;
+import android.graphics.Matrix;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class MapActivity extends AppCompatActivity {
+public class MapActivity extends AppCompatActivity{
 
     private Intent intent;
 
@@ -26,7 +31,8 @@ public class MapActivity extends AppCompatActivity {
     private String link = "https://en.wikipedia.org/wiki/";
     private String html = "<a href="+link+">Link to Wikipedia</a>";
     private String introduction = "World";
-    private String simple = "";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +89,8 @@ public class MapActivity extends AppCompatActivity {
         html = "<a href="+link+">Link to Wikipedia</a>";
         txtLink.setMovementMethod(LinkMovementMethod.getInstance());
         txtLink.setText(Html.fromHtml(html));
+
+
     }
 
     public void onResume() {
@@ -107,5 +115,139 @@ public class MapActivity extends AppCompatActivity {
                 btnSetting.setVisibility(View.INVISIBLE);
             }
         });
+
+        imgMap.setOnTouchListener(new Move());
+    }
+
+    private class Move implements View.OnTouchListener {
+        private Matrix matrix = new Matrix();
+        private PointF startPoint = new PointF();
+        private PointF midPoint;//Two-finger center point
+        private Matrix currentMatrix = new Matrix();
+        private float oldDist;
+        private float zoom = 0f;
+
+        private int mode = 0;//Initial state
+        private static final int DRAG = 1;//Drag mode
+        private static final int ZOOM = 2;//Zoom mode
+
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+//            rectF = getMatrixRectF();
+            switch (motionEvent.getAction()& MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    mode = DRAG;
+                    matrix.set(imgMap.getImageMatrix());
+                    startPoint.set(motionEvent.getX(),motionEvent.getY());
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (mode == ZOOM) {
+                        float newDist = distance(motionEvent);
+                        if (newDist > 10f){
+                            zoom = newDist / oldDist;
+                            currentMatrix.set(matrix);
+                            currentMatrix.postScale(zoom,zoom,midPoint.x,midPoint.y);
+                        }
+                    }else if (mode == DRAG){
+                        float dx = motionEvent.getX() - startPoint.x;
+                        float dy = motionEvent.getY() - startPoint.y;
+                        currentMatrix.set(matrix);
+                        if (Math.abs(dx)>1 || Math.abs(dy)>1){
+                            currentMatrix.postTranslate(dx,dy);
+                        }
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mode = 0;
+                    break;
+                case MotionEvent.ACTION_POINTER_UP:
+                    mode = 0;
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    mode = ZOOM;
+                    oldDist = distance(motionEvent);//两点按下时的距离
+                    if (oldDist > 10f){
+                        midPoint = mid(motionEvent);
+                        currentMatrix.set(imgMap.getImageMatrix());
+                    }
+                    break;
+                default:
+                    break;
+            }
+            imgMap.setImageMatrix(currentMatrix);
+            return true;
+        }
+    }
+
+//    private RectF getMatrixRectF(){
+//        RectF rect = new RectF();
+//        Drawable d = imgMap.getDrawable();
+//        if (null != d){
+//            rect.set(0,0,d.getIntrinsicWidth(),d.getIntrinsicHeight());
+//
+//        }
+//    }
+
+//    private Matrix matrix = new Matrix();
+//    private PointF startPoint = new PointF();
+//    private PointF midPoint;//Two-finger center point
+//    private Matrix currentMatrix = new Matrix();
+//
+//    @Override
+//    public boolean onTouch(View view, MotionEvent motionEvent) {
+//        switch (motionEvent.getAction()& MotionEvent.ACTION_MASK) {
+//            case MotionEvent.ACTION_DOWN:
+//                mode = 1;
+//                matrix.set(imgMap.getImageMatrix());//problem
+//                startPoint.set(motionEvent.getX(),motionEvent.getY());
+//                break;
+//            case MotionEvent.ACTION_MOVE:
+//                if (mode >= 2) {
+//                    float newDist = distance(motionEvent);
+//                    if (newDist > 10f){
+//                        zoom=(newDist / oldDist);
+//                        currentMatrix.set(matrix);
+//                        currentMatrix.postScale(zoom,zoom,midPoint.x,midPoint.y);
+//                    }
+//                }else{
+//                    float dx = motionEvent.getX() - startPoint.x;
+//                    float dy = motionEvent.getY() - startPoint.y;
+//                    currentMatrix.set(matrix);
+//                    currentMatrix.postTranslate(dx,dy);
+//                }
+//                break;
+//            case MotionEvent.ACTION_UP:
+//                mode = 0;
+//                break;
+//            case MotionEvent.ACTION_POINTER_UP:
+//                mode -= 1;
+//                break;
+//            case MotionEvent.ACTION_POINTER_DOWN:
+//                mode += 1;
+//                oldDist = distance(motionEvent);//两点按下时的距离
+//                if (oldDist > 10f){
+//                    midPoint = mid(motionEvent);
+//                    currentMatrix.set(imgMap.getImageMatrix());
+//                }
+//                break;
+//        }
+//        imgMap.setImageMatrix(currentMatrix);
+//        return true;
+//    }
+
+    private float distance(MotionEvent event){
+        float x = event.getX(0) - event.getX(1);
+        float y = event.getY(0) - event.getY(1);
+        float dis = (float) Math.sqrt(x * x + y * y);
+        return dis;
+    }
+
+    private static PointF mid(MotionEvent event){
+        float midX = event.getX(1)+event.getX(0);
+        float midY = event.getY(1)+event.getY(0);
+
+        return new PointF(midX/2,midY/2);
     }
 }
+
+

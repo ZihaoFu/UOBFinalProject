@@ -4,18 +4,15 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
-import android.util.FloatMath;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -25,8 +22,6 @@ import java.util.TimerTask;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import fuzihao.test1.FileUtil;
-
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
     private GLSurfaceView glsv_content;
     //使用OpenGL库创建一个材质(Texture)，首先是获取一个Texture Id。
@@ -34,8 +29,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private int divide = 40;
     private int radius = 3;
     private float move = 0.1f;
-    private float angle = 0;
-    private float angle2 = 0;
+    private float angle = 0;//横向旋转角度
+    private float angle2 = 0;//竖向旋转角度
+//    private float angle2z = 80.0f;
+//    private float angle2y = 0;
     private ArrayList<FloatBuffer> mVertices = new ArrayList<FloatBuffer>();
     private ArrayList<FloatBuffer> mTextureCoords = new ArrayList<FloatBuffer>();
     private Bitmap mBitmap;
@@ -58,19 +55,22 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private Float changey = 0.0f;
 
     private int mode = 0;
+    private static final int DRAG = 1;//Drag mode
+    private static final int ZOOM = 2;//Zoom mode
     float oldDist;
     float origin = 1.0f;
     float zoom = 1.0f;
 
     Timer timer = new Timer();
 
+    private Globe globe = new Globe();
+    private circle label = new circle();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        // 计算球面顶点坐标
-        getSphereVertices();
 
         Intent intentFromSelect = getIntent();
         select = intentFromSelect.getIntExtra("num",0);
@@ -124,13 +124,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         switch (motionEvent.getAction()& MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 //有按下动作时暂停地球仪的旋转
-                mode = 1;
+                mode = DRAG;
                 x = motionEvent.getX();
                 y = motionEvent.getY();
                 move=0;
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (mode >= 2) {
+                move = 0f;
+                if (mode == ZOOM) {
                     float newDist = distance(motionEvent);
                     if (newDist > oldDist + 1){
                         zoom=(newDist / oldDist);
@@ -141,28 +142,37 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                         origin = origin*zoom;
                         oldDist = newDist;
                     }
-
-                }else{
+                }else if (mode == DRAG){
                     newx = motionEvent.getX();
                     newy = motionEvent.getY();
                     changex = -(newx-x);
                     changey = (newy-y);
-                    angle = angle + changex/100;
-                    angle2 = angle2 + changey/100;
+                    angle = angle + changex/360;
+                    angle2 = angle2 + changey/360;
+
+//                    if (changey >= 0){
+//                        angle = angle + changex/100;
+//                        angle2 = angle2 + changey/100;
+//                        angle2z = (12800 - (160 * (float) Math.sin(angle2/160)) * (160 * (float) Math.sin(angle2/160))) / 160;
+//                        angle2y = (float) Math.sqrt(6400 - (angle2z * angle2z));
+//                    }else{
+//                        angle = angle + changex/100;
+//                        angle2 = angle2 + changey/100;
+//                        angle2y = (12800 - (160 * (float) Math.sin(angle2/160)) * (160 * (float) Math.sin(angle2/160))) / 160;
+//                        angle2z = (float) Math.sqrt(6400 - (angle2y * angle2y));
+////                        angle2y = -angle2y;
+//                    }
+
+//                    newx = motionEvent.getRawX() - x;
+//                    newy = motionEvent.getRawY() - y;
+//                    float a = 180.0f / 32000;
+//                    angle += newx * a;
+//                    angle2 += newy * a;
                 }
-
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        move=0.1f;
-                    }
-                },2000);
-
                 break;
             case MotionEvent.ACTION_UP:
                 mode = 0;
                 //抬起时地球仪继续旋转
-
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
@@ -171,18 +181,13 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 },2000);
                 break;
             case MotionEvent.ACTION_POINTER_UP:
-                mode -= 1;
+                mode = 0;
                 move = 0f;
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
+                mode = ZOOM;
                 oldDist = distance(motionEvent);//两点按下时的距离
-                mode += 1;
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        move=0.1f;
-                    }
-                },2000);
+                move = 0f;
                 break;
         }
         return true;
@@ -246,54 +251,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         super.onDestroy();
     }
 
-    private void getSphereVertices() {
-        float altitude;
-        float altitudeDelta;
-        float azimuth;
-        float ex;
-        float ey;
-        float ez;
-        for(int i = 0; i <= divide; i++) {
-            altitude      = (float) (Math.PI/2.0 -    i    * (Math.PI) / divide); //海拔
-            altitudeDelta = (float) (Math.PI/2.0 - (i + 1) * (Math.PI) / divide);
-
-            float[] vertices = new float[divide*6+6]; //顶点
-            float[] texCoords = new float[divide*4+4];
-
-            for(int j = 0; j <= divide; j++) {
-                azimuth = (float)(j * (Math.PI*2) / divide);
-
-                ex = (float) (Math.cos(altitude) * Math.cos(azimuth));
-                ey = (float)  Math.sin(altitude);
-                ez = (float) - (Math.cos(altitude) * Math.sin(azimuth));
-
-                vertices[6*j+0] = radius * ex;
-                vertices[6*j+1] = radius * ey;
-                vertices[6*j+2] = radius * ez;
-
-                texCoords[4*j+0] = j/(float)divide;
-                texCoords[4*j+1] = i/(float)divide;
-
-                ex = (float) (Math.cos(altitudeDelta) * Math.cos(azimuth));
-                ey = (float) Math.sin(altitudeDelta);
-                ez = (float) -(Math.cos(altitudeDelta) * Math.sin(azimuth));
-
-                vertices[6*j+3] = radius * ex;
-                vertices[6*j+4] = radius * ey;
-                vertices[6*j+5] = radius * ez;
-
-                texCoords[4*j+2] = j/(float)divide;
-                texCoords[4*j+3] = (i + 1) / (float)divide;
-            }
-
-            mVertices.add(FileUtil.getFloatBuffer(vertices));
-            mTextureCoords.add(FileUtil.getFloatBuffer(texCoords));
-        }
-    }
-
-
-
     private class GLRender implements GLSurfaceView.Renderer {
+
+//      private Triangle triangle;
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             // 背景：白色
@@ -307,6 +267,28 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             // 启动某功能，对应的glDisable是关闭某功能。GL_DEPTH_TEST指的是深度测试
             gl.glEnable(GL10.GL_DEPTH_TEST);
             //gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
+
+            //在位置（1，1，1）处定义光源
+            float lightAmbient[] = new float[]{0.3f, 0.3f, 0.3f, 1};
+            float lightDiffuse[] = new float[]{1, 1, 1, 1};
+            float lightPos[] = new float[]{1, 1, 1, 1};
+            gl.glEnable(GL10.GL_LIGHTING);//禁用颜色抖动 消除可能性的性能高消耗
+            gl.glEnable(GL10.GL_LIGHT0);//设置清除颜色缓冲区时用的RGBA颜色值
+
+            //设置环境光
+            gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_AMBIENT, lightAmbient, 0);
+
+            //设置漫射光
+            gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_DIFFUSE, lightDiffuse, 0);
+
+            //设置光源位置
+            gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_POSITION, lightPos, 0);
+
+            //定义立方体材质
+            float matAmbient[] = new float[]{1, 1, 1, 1};
+            float matDiffuse[] = new float[]{1, 1, 1, 1};
+            gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_AMBIENT, matAmbient, 0);
+            gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_DIFFUSE, matDiffuse, 0);
 
             // 告诉OpenGL去生成textures.textures中存放了创建的Texture ID
             gl.glGenTextures(1, textures, 0);
@@ -323,14 +305,15 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
             //将Bitmap资源和Texture绑定起来
             GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
+//            triangle = new Triangle(mview);
         }
 
         @Override
         public void onSurfaceChanged(GL10 gl, int width, int height) {
             //GL_PROJECTION和GL_MODELVIEW有什么区别？能否去掉GL_PROJECTION？
-            gl.glViewport(0,0,width,height);
-            gl.glMatrixMode(GL10.GL_PROJECTION);
-            gl.glLoadIdentity();
+            gl.glViewport(0,0,width,height);//将当前矩阵模式设为投影矩形
+            gl.glMatrixMode(GL10.GL_PROJECTION);//初始化单位矩阵
+            gl.glLoadIdentity();//计算透视窗口的宽度高度比
             //第二个参数是视角，越大则视野越广
             //第三个参数是宽高比
             //第四个参数表示眼睛距离物体最近处的距离
@@ -344,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
         @Override
         public void onDrawFrame(GL10 gl) {
-            gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+            gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);//启用顶点坐标数据
             //下面的glLoadIdentity是否确有必要？
             gl.glLoadIdentity();
             //这个是俯视，眼睛在y坐标5.0，球体半径为3
@@ -354,61 +337,48 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             //GLU.gluLookAt(gl, 0.0f, 70.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);//正上
             //GLU.gluLookAt(gl, 0.0f, -70.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);//正下
             //GLU.gluLookAt(gl, 0.0f, 30.0f, 60.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+            GLU.gluLookAt(gl, 0.0f, 0.0f, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+
             if (angle2>=60){
-                GLU.gluLookAt(gl, 0.0f, 60f, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+                angle2 = 60.0f;
+                gl.glRotatef(60.0f,1,0,0);
             }else if (angle2<=-60){
-                GLU.gluLookAt(gl, 0.0f, -60.0f, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+                angle2 = -60.0f;
+                gl.glRotatef(-60.0f,1,0,0);
             }else{
-                GLU.gluLookAt(gl, 0.0f, angle2, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+                gl.glRotatef(angle2,1,0,0);
             }
+            gl.glRotatef(-angle, 0, 1, 0);  //设置旋转动画
 
-            //            gl.glTranslatef(changex,changey,0);
-//            if (changex!=0f){
-//                gl.glRotatef(-angle, 0, 1, 0);  //设置旋转动画
-//            }else if (changey!=0f){
-//                gl.glRotatef(-angle2, 1, 0, 0);  //设置旋转动画
-//            }else{
-                gl.glRotatef(-angle, 0, 1, 0);  //设置旋转动画
-//            }
-
-
-            if (origin>=3f){
+            if (origin>=3.0f){
+                origin = 3.0f;
                 gl.glScalef(3f,3f,3f);
             }else if(origin<=0.5f){
+                origin = 0.5f;
                 gl.glScalef(0.5f,0.5f,0.5f);
             }else
             {
                 gl.glScalef(origin,origin,origin);
             }
-
             //gl.glTranslatef(3, 0, 0);  //设置平移动画
             //gl.glRotatef(angle, 0, 0, -1);
             //gl.glRotatef(angle, 0, -1, 0);
-            drawGlobe(gl);
-
+//            drawGlobe(gl);
+            globe.drawGlobe(gl);
             angle=angle+move;
-        }
-    }
 
-    private void drawGlobe(GL10 gl) {
-        //启用纹理
-        gl.glEnable(GL10.GL_TEXTURE_2D);
-        //打开材质开关
-        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-        //打开顶点开关
-        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        for(int i= 0;i<=divide;i++){
-            gl.glVertexPointer(3, GL10.GL_FLOAT, 0, mVertices.get(i));
-            //声明纹理点坐标
-            gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTextureCoords.get(i));
-            //GL_LINE_STRIP只绘制线条，GL_TRIANGLE_STRIP才是画三角形的面
-            gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, divide*2+2);
-            //gl.glDrawArrays(GL10.GL_LINE_STRIP, 0, divide*2+2);
+            //add label
+//            gl.glLoadIdentity();
+            GLU.gluLookAt(gl,0.0f, 0.0f, 3.01f,
+                    0.0f, 0.0f, 0.0f,
+                    0.0f, 1.0f, 0.0f);
+            gl.glPushMatrix();
+            // Rotate Star A counter-clockwise.
+//            gl.glRotatef(angle, 0, 0, 1);
+//            gl.glTranslatef(3, 0, 0);
+            gl.glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+            label.draw(gl);
+            gl.glPopMatrix();
         }
-        //关闭顶点开关
-        gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-        //关闭材质开关
-        gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-        gl.glDisable(GL10.GL_TEXTURE_2D);
     }
 }
