@@ -25,12 +25,13 @@ import javax.microedition.khronos.opengles.GL10;
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
     private GLSurfaceView glsv_content;
     //使用OpenGL库创建一个材质(Texture)，首先是获取一个Texture Id。
-    private int[] textures = new int[1];
+    //Use the OpenGL library to create a texture.
+    private int[] textures = new int[1];//Get a texture ID.
     private int divide = 40;
     private int radius = 3;
     private float move = 0.1f;
-    private float angle = 0;//横向旋转角度
-    private float angle2 = 0;//竖向旋转角度
+    private float angle = 0;//横向旋转角度 Lateral rotation angle
+    private float angle2 = 0;//竖向旋转角度 Vertical rotation angle
 //    private float angle2z = 80.0f;
 //    private float angle2y = 0;
     private ArrayList<FloatBuffer> mVertices = new ArrayList<FloatBuffer>();
@@ -58,11 +59,12 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private static final int DRAG = 1;//Drag mode
     private static final int ZOOM = 2;//Zoom mode
     float oldDist;
-    float origin = 1.0f;
-    float zoom = 1.0f;
+    float origin = 1.0f;//Original ratio
+    float zoom = 1.0f;  //Zoom ratio
 
     Timer timer = new Timer();
 
+    //Call other classes
     private Globe globe = new Globe();
     private circle label = new circle();
 
@@ -70,11 +72,13 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initView();
+        initView();//初始化控件 Initialise controls
 
+        //获取选择界面选择的选项
+        //Get the options selected in the selectActivity
         Intent intentFromSelect = getIntent();
         select = intentFromSelect.getIntExtra("num",0);
-        // 绑定地图
+        // 绑定地图 Binding map
         if (select==0){
             mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe1);
             title = "Geographic Globe";
@@ -89,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             txtTitle.setText(title);
         }
 
+        //绑定View, 初始化Renderer,并设置触摸监听器
+        //Bind view, initialise renderer, and set touch listener
         glsv_content = (GLSurfaceView)findViewById(R.id.glsv_content);
         glsv_content.setRenderer(new GLRender());
         glsv_content.setOnTouchListener(this);
@@ -97,16 +103,20 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     @Override
     public void onResume() {
         super.onResume();
+        //回到界面时,显示所有控件
+        //When returning to the interface, show all controls
         btnSetting.setVisibility(View.VISIBLE);
         txtTitle.setVisibility(View.VISIBLE);
         btnDay.setVisibility(View.VISIBLE);
     }
 
     private void initView(){
+        //将控件绑定至变量 Bind controls to variables
         btnSetting=(ImageButton)findViewById(R.id.btnSetting);
         txtTitle=(TextView) findViewById(R.id.txtTitle);
         btnDay=(ImageButton)findViewById(R.id.btnDayAndNight);
 
+        //给设置按钮添加点击监听器 Add click listener to setting button
         btnSetting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -119,11 +129,13 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         });
     }
 
+    //Touch action
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         switch (motionEvent.getAction()& MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
-                //有按下动作时暂停地球仪的旋转
+                //有按下动作时获取当前屏幕坐标, 并暂停地球仪的旋转
+                //Obtain the current screen coordinates when a finger is on the screen, and pause the rotation of the globe
                 mode = DRAG;
                 x = motionEvent.getX();
                 y = motionEvent.getY();
@@ -131,7 +143,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 break;
             case MotionEvent.ACTION_MOVE:
                 move = 0f;
+                // 手指移动时首先判断模式是拖拽还是缩放
+                // judge whether the mode is drag or zoom when the fingers move
                 if (mode == ZOOM) {
+                    //获取新的距离, 然后计算缩放比例
+                    //Get the new distance and calculate the zoom ratio
                     float newDist = distance(motionEvent);
                     if (newDist > oldDist + 1){
                         zoom=(newDist / oldDist);
@@ -143,6 +159,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                         oldDist = newDist;
                     }
                 }else if (mode == DRAG){
+                    //获取新的坐标, 计算变化的距离
+                    //Get new coordinates and calculate the changing distance
                     newx = motionEvent.getX();
                     newy = motionEvent.getY();
                     changex = -(newx-x);
@@ -173,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             case MotionEvent.ACTION_UP:
                 mode = 0;
                 //抬起时地球仪继续旋转
+                //The globe continues to rotate when the fingers are raised
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
@@ -186,58 +205,15 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
                 mode = ZOOM;
-                oldDist = distance(motionEvent);//两点按下时的距离
+                oldDist = distance(motionEvent);//Distance when two points are pressed
                 move = 0f;
                 break;
         }
         return true;
     }
 
-//    @Override
-//    public boolean dispatchTouchEvent(MotionEvent ev) {
-//        switch (ev.getAction()& MotionEvent.ACTION_MASK) {
-//            case MotionEvent.ACTION_DOWN:
-//                //有按下动作时暂停地球仪的旋转
-//                mode = 1;
-//                x = ev.getX();
-//                y = ev.getY();
-//                move=0;
-//                break;
-//            case MotionEvent.ACTION_MOVE:
-//                if (mode >= 2) {
-//                    float newDist = distance(ev);
-//                    if (newDist > oldDist + 1){
-//                        zoom=(newDist / oldDist);
-//                        oldDist = newDist;
-//                    }else if(newDist < oldDist+1){
-//                        zoom=(newDist / oldDist);
-//                        oldDist = newDist;
-//                    }
-//
-//                }else{
-//                    newx = ev.getX();
-//                    newy = ev.getY();
-//                    float changex = -(newx-x);
-//                    float changey = (newy-y);
-//                }
-////                angle = changex;
-//                break;
-//            case MotionEvent.ACTION_UP:
-//                mode = 0;
-//                //抬起时地球仪继续旋转
-//                move=0.1f;
-//                break;
-//            case MotionEvent.ACTION_POINTER_UP:
-//                mode -= 1;
-//                break;
-//            case MotionEvent.ACTION_POINTER_DOWN:
-//                oldDist = distance(ev);//两点按下时的距离
-//                mode += 1;
-//                break;
-//        }
-//        return super.dispatchTouchEvent(ev);
-//    }
-
+    //计算欧式距离
+    //Calculate Euclidean distance
     private float distance(MotionEvent event){
         float x = event.getX(0) - event.getX(1);
         float y = event.getY(0) - event.getY(1);
@@ -251,36 +227,43 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         super.onDestroy();
     }
 
+    //Renderer class
     private class GLRender implements GLSurfaceView.Renderer {
-
-//      private Triangle triangle;
+        //在GLSurfaceView内Surface被创建时调用
+        //onSurfaceCreated will be called when the Surface is created in GLSurfaceView
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-            // 背景：白色
+            // 背景：白色 Background: white
+            //The glClearColor function specifies clear values for the color buffers.
             gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            // 启动阴影平滑
+            // 设置着色模式 Set shade mode GL_SMOOTH/GL_FLAT
+            // 启动阴影平滑 独立的处理图元中各个顶点的颜色
+            // use GL_SMOOTH to independently handle the color of each vertex in the entity
             gl.glShadeModel(GL10.GL_SMOOTH);
             // 复位深度缓存
+            //Specify a depth value,this value will be used by the glclear function to clean up the depth buffer
             gl.glClearDepthf(1f);
             // 所做深度测试的类型，同时必须开启GL10.GL_DEPTH_TEST
+            // Specify depth comparison function
+            // GL_LEQUAL: 如果输入的深度值小于或等于参考值，则通过
+            // Depth value entered <= reference value, pass
             gl.glDepthFunc(GL10.GL_LEQUAL);
             // 启动某功能，对应的glDisable是关闭某功能。GL_DEPTH_TEST指的是深度测试
+            // OpenGL只绘制最前面的一层, 被遮挡的不会绘制
+            // GL_DEPTH_TEST: OpenGL draws only the first layer,and the occluded layer will not be drawn.
             gl.glEnable(GL10.GL_DEPTH_TEST);
-            //gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
 
+            //Test part
             //在位置（1，1，1）处定义光源
-            float lightAmbient[] = new float[]{0.3f, 0.3f, 0.3f, 1};
-            float lightDiffuse[] = new float[]{1, 1, 1, 1};
-            float lightPos[] = new float[]{1, 1, 1, 1};
+            float lightAmbient[] = new float[]{0.3f, 0.3f, 0.3f, 1};//环境光
+            float lightDiffuse[] = new float[]{1, 1, 1, 1};//漫射光
+            float lightPos[] = new float[]{1, 1, 1, 1};//位置
             gl.glEnable(GL10.GL_LIGHTING);//禁用颜色抖动 消除可能性的性能高消耗
             gl.glEnable(GL10.GL_LIGHT0);//设置清除颜色缓冲区时用的RGBA颜色值
-
             //设置环境光
             gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_AMBIENT, lightAmbient, 0);
-
             //设置漫射光
             gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_DIFFUSE, lightDiffuse, 0);
-
             //设置光源位置
             gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_POSITION, lightPos, 0);
 
@@ -291,29 +274,35 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_DIFFUSE, matDiffuse, 0);
 
             // 告诉OpenGL去生成textures.textures中存放了创建的Texture ID
+            // Function to generate texture
             gl.glGenTextures(1, textures, 0);
             //通知OpenGL库使用这个Texture
+            //Binding texture
             gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
             //用来渲染的Texture可能比要渲染的区域大或者小,所以需要设置Texture需要放大或是缩小时OpenGL的模式
             //常用的两种模式为GL10.GL_LINEAR和GL10.GL_NEAREST。
             //需要比较清晰的图像使用GL10.GL_NEAREST,而使用GL10.GL_LINEAR则会得到一个较模糊的图像
+            //set Texture sampling
             gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
             gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
             //当定义的材质坐标点超过UV坐标定义的大小(UV坐标为0,0到1,1)，这时需要告诉OpenGL库如何去渲染这些不存在的Texture部分。
             //有两种设置:GL_REPEAT 重复Texture。GL_CLAMP_TO_EDGE 只靠边线绘制一次。
+            //Set texture stretch,edge processing
             gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
             gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
             //将Bitmap资源和Texture绑定起来
+            //Bind bitmap resource and texture
             GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
-//            triangle = new Triangle(mview);
         }
 
+        //Surface尺寸改变时调用
+        //It will be called when the surface size changes
         @Override
         public void onSurfaceChanged(GL10 gl, int width, int height) {
-            //GL_PROJECTION和GL_MODELVIEW有什么区别？能否去掉GL_PROJECTION？
-            gl.glViewport(0,0,width,height);//将当前矩阵模式设为投影矩形
-            gl.glMatrixMode(GL10.GL_PROJECTION);//初始化单位矩阵
-            gl.glLoadIdentity();//计算透视窗口的宽度高度比
+            gl.glViewport(0,0,width,height);//将标准化的设备坐标转换为屏幕坐标 Convert normalized device coordinate to screen coordinate
+            gl.glMatrixMode(GL10.GL_PROJECTION);//将当前矩阵模式设为投影矩形以设置透视关系 Set the current matrix mode to GL_PROJECTION to set the perspective relationship
+            gl.glLoadIdentity();//初始化单位矩阵 Initialize unit matrix
+            //计算透视窗口的宽度高度比
             //第二个参数是视角，越大则视野越广
             //第三个参数是宽高比
             //第四个参数表示眼睛距离物体最近处的距离
@@ -321,14 +310,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             //gluPerspective和gluLookAt需要配合使用，才能调节观察到的物体大小
             //GLU.gluPerspective(gl, 50, (float) width / (float) height, 0.1f, 100.0f);
             GLU.gluPerspective(gl, 8, (float) width / (float) height, 0.1f, 100.0f);
-            gl.glMatrixMode(GL10.GL_MODELVIEW);
+            gl.glMatrixMode(GL10.GL_MODELVIEW);//切换到GL_MODELVIEW来绘制图像 Switch to GL_MODELVIEW to paint the texture
             gl.glLoadIdentity();
         }
 
+        //重复调用这个方法 Call this method repeatedly
         @Override
         public void onDrawFrame(GL10 gl) {
-            gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);//启用顶点坐标数据
-            //下面的glLoadIdentity是否确有必要？
+            gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);//清除颜色缓冲以及深度缓冲 Clear color buffer and depth buffer
             gl.glLoadIdentity();
             //这个是俯视，眼睛在y坐标5.0，球体半径为3
             //GLU.gluLookAt(gl, 0.0f, 5.0f, 15.0f
@@ -337,8 +326,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             //GLU.gluLookAt(gl, 0.0f, 70.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);//正上
             //GLU.gluLookAt(gl, 0.0f, -70.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);//正下
             //GLU.gluLookAt(gl, 0.0f, 30.0f, 60.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+            //设置眼睛的位置，眼睛朝向的位置，以及头顶朝向的方向
+            //Set the position of the eyes, a position where the eyes are facing and the direction of the head
             GLU.gluLookAt(gl, 0.0f, 0.0f, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
+            // 设置旋转动画 Set rotation angle and direction (gestures)
             if (angle2>=60){
                 angle2 = 60.0f;
                 gl.glRotatef(60.0f,1,0,0);
@@ -348,8 +340,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             }else{
                 gl.glRotatef(angle2,1,0,0);
             }
-            gl.glRotatef(-angle, 0, 1, 0);  //设置旋转动画
+            gl.glRotatef(-angle, 0, 1, 0);
 
+            // 设置缩放动画 Set zoom ratio(gestures)
             if (origin>=3.0f){
                 origin = 3.0f;
                 gl.glScalef(3f,3f,3f);
@@ -360,22 +353,13 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             {
                 gl.glScalef(origin,origin,origin);
             }
-            //gl.glTranslatef(3, 0, 0);  //设置平移动画
-            //gl.glRotatef(angle, 0, 0, -1);
-            //gl.glRotatef(angle, 0, -1, 0);
-//            drawGlobe(gl);
-            globe.drawGlobe(gl);
-            angle=angle+move;
+            globe.drawGlobe(gl);//Call the globe class to draw a globe
+            angle=angle+move; // Auto rotate globe
 
             //add label
 //            gl.glLoadIdentity();
-            GLU.gluLookAt(gl,0.0f, 0.0f, 3.01f,
-                    0.0f, 0.0f, 0.0f,
-                    0.0f, 1.0f, 0.0f);
+            GLU.gluLookAt(gl,0.0f, 0.0f, 3.01f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
             gl.glPushMatrix();
-            // Rotate Star A counter-clockwise.
-//            gl.glRotatef(angle, 0, 0, 1);
-//            gl.glTranslatef(3, 0, 0);
             gl.glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
             label.draw(gl);
             gl.glPopMatrix();

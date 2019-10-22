@@ -28,11 +28,9 @@ public class MapActivity extends AppCompatActivity{
     private TextView txtLink;
     private ImageButton btnSetting;
 
-    private String link = "https://en.wikipedia.org/wiki/";
+    private String link = "https://en.wikipedia.org/wiki/"; // Set a basic link
     private String html = "<a href="+link+">Link to Wikipedia</a>";
     private String introduction = "World";
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,8 +87,6 @@ public class MapActivity extends AppCompatActivity{
         html = "<a href="+link+">Link to Wikipedia</a>";
         txtLink.setMovementMethod(LinkMovementMethod.getInstance());
         txtLink.setText(Html.fromHtml(html));
-
-
     }
 
     public void onResume() {
@@ -98,6 +94,7 @@ public class MapActivity extends AppCompatActivity{
         btnSetting.setVisibility(View.VISIBLE);
     }
 
+    //Bind controls to variables, Set click listener and touch listener
     private void initView(){
         imgMap = (ImageView) findViewById(R.id.imgMap);
         txtIntroduction = (TextView) findViewById(R.id.txtIntroduction);
@@ -115,7 +112,6 @@ public class MapActivity extends AppCompatActivity{
                 btnSetting.setVisibility(View.INVISIBLE);
             }
         });
-
         imgMap.setOnTouchListener(new Move());
     }
 
@@ -133,7 +129,6 @@ public class MapActivity extends AppCompatActivity{
 
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-//            rectF = getMatrixRectF();
             switch (motionEvent.getAction()& MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
                     mode = DRAG;
@@ -165,7 +160,7 @@ public class MapActivity extends AppCompatActivity{
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
                     mode = ZOOM;
-                    oldDist = distance(motionEvent);//两点按下时的距离
+                    oldDist = distance(motionEvent);//两点按下时的距离 Distance when two points are pressed
                     if (oldDist > 10f){
                         midPoint = mid(motionEvent);
                         currentMatrix.set(imgMap.getImageMatrix());
@@ -179,62 +174,7 @@ public class MapActivity extends AppCompatActivity{
         }
     }
 
-//    private RectF getMatrixRectF(){
-//        RectF rect = new RectF();
-//        Drawable d = imgMap.getDrawable();
-//        if (null != d){
-//            rect.set(0,0,d.getIntrinsicWidth(),d.getIntrinsicHeight());
-//
-//        }
-//    }
-
-//    private Matrix matrix = new Matrix();
-//    private PointF startPoint = new PointF();
-//    private PointF midPoint;//Two-finger center point
-//    private Matrix currentMatrix = new Matrix();
-//
-//    @Override
-//    public boolean onTouch(View view, MotionEvent motionEvent) {
-//        switch (motionEvent.getAction()& MotionEvent.ACTION_MASK) {
-//            case MotionEvent.ACTION_DOWN:
-//                mode = 1;
-//                matrix.set(imgMap.getImageMatrix());//problem
-//                startPoint.set(motionEvent.getX(),motionEvent.getY());
-//                break;
-//            case MotionEvent.ACTION_MOVE:
-//                if (mode >= 2) {
-//                    float newDist = distance(motionEvent);
-//                    if (newDist > 10f){
-//                        zoom=(newDist / oldDist);
-//                        currentMatrix.set(matrix);
-//                        currentMatrix.postScale(zoom,zoom,midPoint.x,midPoint.y);
-//                    }
-//                }else{
-//                    float dx = motionEvent.getX() - startPoint.x;
-//                    float dy = motionEvent.getY() - startPoint.y;
-//                    currentMatrix.set(matrix);
-//                    currentMatrix.postTranslate(dx,dy);
-//                }
-//                break;
-//            case MotionEvent.ACTION_UP:
-//                mode = 0;
-//                break;
-//            case MotionEvent.ACTION_POINTER_UP:
-//                mode -= 1;
-//                break;
-//            case MotionEvent.ACTION_POINTER_DOWN:
-//                mode += 1;
-//                oldDist = distance(motionEvent);//两点按下时的距离
-//                if (oldDist > 10f){
-//                    midPoint = mid(motionEvent);
-//                    currentMatrix.set(imgMap.getImageMatrix());
-//                }
-//                break;
-//        }
-//        imgMap.setImageMatrix(currentMatrix);
-//        return true;
-//    }
-
+    // Calculate Euclidean distance
     private float distance(MotionEvent event){
         float x = event.getX(0) - event.getX(1);
         float y = event.getY(0) - event.getY(1);
@@ -242,6 +182,7 @@ public class MapActivity extends AppCompatActivity{
         return dis;
     }
 
+    // Calculate the midpoint of two fingers
     private static PointF mid(MotionEvent event){
         float midX = event.getX(1)+event.getX(0);
         float midY = event.getY(1)+event.getY(0);

@@ -44,8 +44,7 @@ public class circle {
         circleCoords[offset++] = x;// 中心点
         circleCoords[offset++] = y;
         for (int i = 0; i < count + 1; i++) {
-            float angleInRadians = ((float) i / (float) count)
-                    * ((float) Math.PI * 2f);
+            float angleInRadians = ((float) i / (float) count) * ((float) Math.PI * 2f);
 //            float angleInRadians = ((float) i / (float) count)
 //                    * ((float) Math.PI);
             circleCoords[offset++] = x + r * (float)Math.sin(angleInRadians);
