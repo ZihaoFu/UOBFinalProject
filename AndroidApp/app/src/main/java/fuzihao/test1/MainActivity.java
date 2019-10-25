@@ -293,12 +293,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             //将Bitmap资源和Texture绑定起来
             //Bind bitmap resource and texture
             GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
+            gl.glReadPixels();
         }
 
         //Surface尺寸改变时调用
         //It will be called when the surface size changes
         @Override
         public void onSurfaceChanged(GL10 gl, int width, int height) {
+//            int[] viewPort = new int[]{0,0,width,height};
             gl.glViewport(0,0,width,height);//将标准化的设备坐标转换为屏幕坐标 Convert normalized device coordinate to screen coordinate
             gl.glMatrixMode(GL10.GL_PROJECTION);//将当前矩阵模式设为投影矩形以设置透视关系 Set the current matrix mode to GL_PROJECTION to set the perspective relationship
             gl.glLoadIdentity();//初始化单位矩阵 Initialize unit matrix
