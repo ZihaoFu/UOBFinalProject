@@ -49,4 +49,17 @@
         android:contentDescription="@string/dayAndNight"
         app:srcCompat="@drawable/dayopen" />
 
+    <ImageButton
+        android:id="@+id/btnRotate"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="@+id/glsv_content"
+        app:layout_constraintEnd_toStartOf="@+id/btnDayAndNight"
+        app:layout_constraintStart_toEndOf="@+id/btnSetting"
+        app:srcCompat="@drawable/stop" />
+
 </android.support.constraint.ConstraintLayout>

@@ -6,6 +6,12 @@ import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import static android.opengl.GLES20.GL_BLEND;
+import static android.opengl.GLES20.GL_DEPTH_TEST;
+import static android.opengl.GLES20.GL_ONE;
+import static android.opengl.GLES20.GL_SRC_ALPHA;
+
+
 public class Label {
     // Our vertices.
     protected float vertices[];
@@ -34,15 +40,11 @@ public class Label {
         gl.glEnable(GL10.GL_CULL_FACE);
         // What faces to remove with the face culling.
         gl.glCullFace(GL10.GL_BACK);
-        // Enabled the vertices buffer for writing
-        //and to be used during
-        // rendering.
+        // Enabled the vertices buffer for writing and to be used during rendering.
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        // Specifies the location and data format of
-        //an array of vertex
-        // coordinates to use when rendering.
-        gl.glVertexPointer(2, GL10.GL_FLOAT, 0,
-                vertexBuffer);
+        // Specifies the location and data format of an array of vertex coordinates to use when rendering.
+        gl.glVertexPointer(2, GL10.GL_FLOAT, 0, vertexBuffer);
+        gl.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
 //        gl.glDrawArrays(GL10.GL_LINE_LOOP, 0,5);
         gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0,5);
         // Disable the vertices buffer.

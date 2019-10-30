@@ -4,12 +4,14 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.PointF;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.InputFilter;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.view.MotionEvent;
@@ -17,6 +19,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MapActivity extends AppCompatActivity{
 
@@ -32,6 +35,8 @@ public class MapActivity extends AppCompatActivity{
     private String html = "<a href="+link+">Link to Wikipedia</a>";
     private String introduction = "World";
 
+    int select;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +44,7 @@ public class MapActivity extends AppCompatActivity{
 
         initView();
         intent = getIntent();
-        int select = intent.getIntExtra("map",0);
+        select = intent.getIntExtra("map",0);
         if (select==0){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.world1));
             introduction = "World";;
@@ -82,6 +87,35 @@ public class MapActivity extends AppCompatActivity{
             introduction = "Antarctica";
             txtIntroduction.setText(introduction);
             txtSimple.setText(R.string.introductionOfAntarctica);
+        }
+        //place image
+        else if (select==8){
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.france));
+            introduction = "France";
+            txtIntroduction.setText(introduction);
+            txtSimple.setText(R.string.introductionOfFrance);
+        }else if (select==9){
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.uk));
+            introduction = "United Kingdom";
+            txtIntroduction.setText(introduction);
+            introduction = "United_Kingdom";
+            txtSimple.setText(R.string.introductionOfUK);
+        }else if (select==10){
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.russia));
+            introduction = "Russia";
+            txtIntroduction.setText(introduction);
+            txtSimple.setText(R.string.introductionOfRussia);
+        }else if (select==11){
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.us));
+            introduction = "United States";
+            txtIntroduction.setText(introduction);
+            introduction = "United_States";
+            txtSimple.setText(R.string.introductionOfUS);
+        }else if (select==12){
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.china));
+            introduction = "China";
+            txtIntroduction.setText(introduction);
+            txtSimple.setText(R.string.introductionOfChina);
         }
         link+=introduction;
         html = "<a href="+link+">Link to Wikipedia</a>";
@@ -154,6 +188,62 @@ public class MapActivity extends AppCompatActivity{
                     break;
                 case MotionEvent.ACTION_UP:
                     mode = 0;
+
+                    PointF p1 = getLeftPointF(currentMatrix);
+                    PointF p2 = getRightPointF(currentMatrix);
+
+                    //左边界复位
+                    if(p1.x>0 && p1.x<=imgMap.getWidth()/2){
+                        currentMatrix.postTranslate(-p1.x,0);
+                    }
+                    //拉过一半时操作前往上一张图像
+                    if(p1.x>imgMap.getWidth()/2){
+                        if(select==0){
+                            intent = new Intent(MapActivity.this,MapActivity.class);
+                            intent.putExtra("map",7);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        if(select>0&&select<=7){
+                            intent = new Intent(MapActivity.this,MapActivity.class);
+                            intent.putExtra("map",select-1);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                    }
+                    //右边界复位
+                    if(p2.x<imgMap.getWidth() && p2.x>=imgMap.getWidth()/2){
+                        currentMatrix.postTranslate(imgMap.getWidth()-p2.x,0);
+                    }
+                    //拉过一半时操作前往下一张图像
+                    if(p2.x<imgMap.getWidth()/2){
+                        if(select==7){
+                            intent = new Intent(MapActivity.this,MapActivity.class);
+                            intent.putExtra("map",0);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        if(select<7){
+                            intent = new Intent(MapActivity.this,MapActivity.class);
+                            intent.putExtra("map",select+1);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                    }
+                    //上下边界复位
+                    if(p2.y-p1.y>imgMap.getHeight()){
+                        //上边界复位
+                        if(p1.y>0){
+                            currentMatrix.postTranslate(0,-p1.y);
+                        }
+                        //下边界复位
+                        if(p2.y<imgMap.getHeight()){
+                            currentMatrix.postTranslate(0,imgMap.getHeight()-p2.y);
+                        } }
+                    else {
+                        float row = (imgMap.getHeight()-(p2.y-p1.y))/2;
+                        currentMatrix.postTranslate(0,row-p1.y);
+                    }
                     break;
                 case MotionEvent.ACTION_POINTER_UP:
                     mode = 0;
@@ -188,6 +278,26 @@ public class MapActivity extends AppCompatActivity{
         float midY = event.getY(1)+event.getY(0);
 
         return new PointF(midX/2,midY/2);
+    }
+
+    //获取图片的上坐标
+    private PointF getLeftPointF(Matrix matrix){
+        Rect rectTemp = imgMap.getDrawable().getBounds();
+        float[] values = new float[9];
+        matrix.getValues(values);
+        float leftX = values[2];
+        float leftY = values[5];
+        return new PointF(leftX,leftY);
+    }
+
+    //获取图片的下坐标
+    private PointF getRightPointF(Matrix matrix){
+        Rect rectTemp = imgMap.getDrawable().getBounds();
+        float[] values = new float[9];
+        matrix.getValues(values);
+        float leftX = values[2]+rectTemp.width()*values[0];
+        float leftY = values[5]+rectTemp.height()*values[4];
+        return new PointF(leftX,leftY);
     }
 }
 

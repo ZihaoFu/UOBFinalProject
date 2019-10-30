@@ -66,6 +66,7 @@ public class circle {
     }
 
     public void draw(GL10 gl) {
+
         // Counter-clockwise winding.
         gl.glFrontFace(GL10.GL_CCW);
         // Enable face culling.
@@ -79,8 +80,8 @@ public class circle {
         // Specifies the location and data format of
         //an array of vertex
         // coordinates to use when rendering.
-        gl.glVertexPointer(2, GL10.GL_FLOAT, 0,
-                vertexData);
+        gl.glVertexPointer(2, GL10.GL_FLOAT, 0, vertexData);
+
 //        gl.glDrawArrays(GL10.GL_LINE_LOOP, 0,5);
         gl.glDrawArrays(GL10.GL_TRIANGLE_FAN, 0,42);
         // Disable the vertices buffer.
