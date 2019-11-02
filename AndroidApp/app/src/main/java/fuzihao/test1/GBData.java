@@ -16,19 +16,15 @@ public class GBData {
             if (reader == null) {
                 Log.w(TAG, "getColor: reader is null");
                 return -1;
-//                return null;
             }
 
             Image image = reader.acquireLatestImage();
 
             if (image == null) {
                 if (bitmap == null) {
-                    Log.w(TAG, "getColor: image is null");
                     return -1;
-//                    return null;
                 }
                 return bitmap.getPixel(x, y);
-//                return bitmap;
             }
             int width = image.getWidth();
             int height = image.getHeight();
@@ -44,6 +40,5 @@ public class GBData {
             image.close();
 
             return bitmap.getPixel(x, y);
-//            return bitmap;
         }
 }

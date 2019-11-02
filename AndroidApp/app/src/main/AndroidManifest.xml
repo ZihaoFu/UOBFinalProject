@@ -6,7 +6,6 @@
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
-    <!--Google Play将会过滤掉不支持OpenGL ES 2.0版本的用户，拒绝安装-->
 
     <application
         android:allowBackup="true"
@@ -16,8 +15,11 @@
         android:supportsRtl="true"
         android:theme="@style/myTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".MapActivity"
+        <activity android:name=".VRActivity"
             android:theme="@style/myTheme"/>
+        <activity
+            android:name=".MapActivity"
+            android:theme="@style/myTheme" />
         <activity
             android:name=".SelectActivity"
             android:theme="@style/Transparent" />
