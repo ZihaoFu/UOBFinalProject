@@ -1,6 +1,7 @@
 package fuzihao.test1;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -26,6 +27,9 @@ public class VRActivity extends AppCompatActivity implements SensorEventListener
 
     private VrSphere vrSphere;
 
+    private Intent intent;
+    int select;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,8 +45,26 @@ public class VRActivity extends AppCompatActivity implements SensorEventListener
         glSurfaceView.setRenderer(new GLRender());
         glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
-        int texture = R.drawable.france360;
-        vrSphere = new VrSphere(this.getApplicationContext(),texture);
+        intent = getIntent();
+        select = intent.getIntExtra("vr",0);
+        if (select == 0){
+            int texture = R.drawable.france360;
+            vrSphere = new VrSphere(this.getApplicationContext(),texture);
+        }
+        if(select == 1){
+
+        }
+        if(select == 2){
+
+        }
+        if(select == 3){
+
+        }
+        if(select == 4){
+            int texture = R.drawable.panorama04;
+            vrSphere = new VrSphere(this.getApplicationContext(),texture);
+        }
+
     }
 
     @Override

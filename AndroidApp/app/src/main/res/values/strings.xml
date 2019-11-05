@@ -3,12 +3,13 @@
     <string name="setting">Setting</string>
     <string name="globe">Globes</string>
     <string name="map">Maps</string>
-    <string name="dayAndNight">The Key Of Day And Night</string>
+    <string name="dayAndNight">The Switch Of Day And Night</string>
+    <string name="Rotate">The Switch Of Auto Switch</string>
     <string name="howToUse">How To Use</string>
     <string name="info">Information</string>
     <string name="title1">Please select an option</string>
-    <string name="geoGlobe">Geographic Globe</string>
-    <string name="nationGlobe">National Globe</string>
+    <string name="geoGlobe">Physical Globe</string>
+    <string name="nationGlobe">Political Globe</string>
     <string name="timeGlobe">Time Zone Globe</string>
     <string name="worldMap">World Map</string>
     <string name="asiaMap">Asia Map</string>
@@ -19,8 +20,8 @@
     <string name="oceaniaMap">oceania Map</string>
     <string name="antarcticaMap">antarctica Map</string>
     <string name="author">Author: Fu Zihao</string>
-    <string name="version">Version: 2.1</string>
-    <string name="modifyTime">Modify Time: 10/10/2019</string>
+    <string name="version">Version: 2.4</string>
+    <string name="modifyTime">Modify Time: 04/11/2019</string>
 
     <string name="introduction">Introduction</string>
     <string name="introductionOfWorld">"The world is the planet Earth and all life on it, including human civilization. In a philosophical context, the "world" is the whole of the physical Universe, or an ontological world (the "world" of an individual). In a theological context, the world is the material or the profane sphere, as opposed to the celestial, spiritual, transcendent or sacred spheres. "End of the world" scenarios refer to the end of human history, often in religious contexts."</string>
@@ -37,6 +38,12 @@
     <string name="introductionOfRussia">"Russia, or the Russian Federation, is a transcontinental country in Eastern Europe and North Asia. At 17,125,200 square kilometres (6,612,100 sq mi), it is, by a considerable margin, the largest country in the world by area, covering more than one-eighth of the Earth's inhabited land area, and the ninth most populous, with about 146.79 million people as of 2019, including Crimea. About 77% of the population live in the western, European part of the country. Russia's capital, Moscow, is one of the largest cities in the world and the largest city in Europe; other major cities include Saint Petersburg, Novosibirsk, Yekaterinburg and Nizhny Novgorod. Extending across the entirety of Northern Asia and much of Eastern Europe, Russia spans eleven time zones and incorporates a wide range of environments and landforms. From northwest to southeast, Russia shares land borders with Norway, Finland, Estonia, Latvia, Lithuania and Poland (both with Kaliningrad Oblast), Belarus, Ukraine, Georgia, Azerbaijan, Kazakhstan, China, Mongolia and North Korea. It shares maritime borders with Japan by the Sea of Okhotsk and the U.S. state of Alaska across the Bering Strait. However, Russia recognises two more countries that border it, Abkhazia and South Ossetia, both of which are internationally recognized as parts of Georgia."</string>
     <string name="introductionOfUS">"The United States of America (USA), commonly known as the United States (U.S. or US) or America, is a country comprising 50 states, a federal district, five major self-governing territories, and various possessions. At 3.8 million square miles (9.8 million km2), the United States is the world's third or fourth largest country by total area and is slightly smaller than the entire continent of Europe. With a population of over 327 million people, the U.S. is the third most populous country. The capital is Washington, D.C., and the most populous city is New York City. Most of the country is located contiguously in North America between Canada and Mexico."</string>
     <string name="introductionOfChina">"China, officially the People's Republic of China (PRC), is a country in East Asia and the world's most populous country, with a population of around 1.404 billion in 2017. Covering approximately 9,600,000 square kilometers (3,700,000 sq mi), it is the third or fourth largest country by total area. Governed by the Communist Party of China, the state exercises jurisdiction over 22 provinces, five autonomous regions, four direct-controlled municipalities (Beijing, Tianjin, Shanghai, and Chongqing), and the special administrative regions of Hong Kong and Macau."</string>
+
+    <string name="introductionOfPacificOcean">"The Pacific Ocean is the largest and deepest of Earth's oceanic divisions. It extends from the Arctic Ocean in the north to the Southern Ocean (or, depending on definition, to Antarctica) in the south and is bounded by the continents of Asia and Australia in the west and the Americas in the east."</string>
+    <string name="introductionOfAtlanticOcean">"The Atlantic Ocean is the second largest of the world's oceans, with an area of about 106,460,000 square kilometers (41,100,000 square miles). It covers approximately 20 percent of Earth's surface and about 29 percent of its water surface area. It separates the "Old World" from the "New World"."</string>
+    <string name="introductionOfSahara">"The Sahara is a desert located on the African continent. It is the largest hot desert in the world, and the third largest desert overall after Antarctica and the Arctic. Its area of 9,200,000 square kilometres (3,600,000 sq mi) is comparable to the area of China or the United States. The name 'Sahara' is derived from a dialectal Arabic word for "desert", ṣaḥra (صحرا /ˈsˤaħra/)."</string>
+    <string name="introductionOfIndianOcean">"The Indian Ocean is the third-largest of the world's oceanic divisions, covering 70,560,000 km2 (27,240,000 sq mi) or 19.8% of the water on the Earth's surface. It is bounded by Asia to the north, Africa to the west, and Australia to the east. To the south it is bounded by the Southern Ocean or Antarctica, depending on the definition in use."</string>
+    <string name="introductionOfTibetanPlateau">"The Tibetan Plateau, also known in China as the Qinghai–Tibet Plateau or the Qing–Zang Plateau or Himalayan Plateau, is a vast elevated plateau in Central Asia and East Asia, covering most of the Tibet Autonomous Region and Qinghai in western China, as well as Ladakh (Jammu and Kashmir) and Lahaul and Spiti (Himachal Pradesh) in India. It stretches approximately 1,000 kilometres (620 mi) north to south and 2,500 kilometres (1,600 mi) east to west. It is the world's highest and largest plateau, with an area of 2,500,000 square kilometres (970,000 sq mi) (about five times the size of Metropolitan France). With an average elevation exceeding 4,500 metres (14,800 ft) and being surrounded by imposing mountain ranges that harbor the world's two highest summits, Mount Everest and K2, the Tibetan Plateau is often referred to as "the Roof of the World"."</string>
 
     <string name="introductionOfEiffelTower">"The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris, France. It is named after the engineer Gustave Eiffel, whose company designed and built the tower.
 

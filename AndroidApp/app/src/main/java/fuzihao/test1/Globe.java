@@ -1,5 +1,8 @@
 package fuzihao.test1;
 
+import android.graphics.Bitmap;
+import android.opengl.GLUtils;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -10,6 +13,8 @@ import javax.microedition.khronos.opengles.GL10;
 public class Globe {
     private int divide = 40;
     private int radius = 3;
+
+    private int[] textures = new int[1];//Get a texture ID.
 
     private ArrayList<FloatBuffer> mVertices = new ArrayList<FloatBuffer>();
     private ArrayList<FloatBuffer> mTextureCoords = new ArrayList<FloatBuffer>();
@@ -73,13 +78,14 @@ public class Globe {
         }
     }
 
-    public void drawGlobe(GL10 gl) {
+    public void drawGlobe(GL10 gl,Bitmap mBitmap) {
         //启用纹理 Enable GL_TEXTURE_2D
         gl.glEnable(GL10.GL_TEXTURE_2D);
         //打开材质开关 Enable GL_TEXTURE_COORD_ARRAY
         gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
         //打开顶点开关 Enable GL_VERTEX_ARRAY
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+
         for(int i= 0;i<=divide;i++){
             //声明顶点坐标 Declare vertex coordinates
             gl.glVertexPointer(3, GL10.GL_FLOAT, 0, mVertices.get(i));
@@ -88,6 +94,7 @@ public class Globe {
             //GL_LINE_STRIP只绘制线条，GL_TRIANGLE_STRIP才是画三角形的面
             gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, divide*2+2);
         }
+
         //关闭顶点开关 Disable GL_VERTEX_ARRAY
         gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
         //关闭材质开关 Disable GL_TEXTURE_COORD_ARRAY

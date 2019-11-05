@@ -9,6 +9,7 @@ import android.hardware.display.DisplayManager;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.opengl.GLES20;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,9 +20,14 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,11 +39,11 @@ import java.util.TimerTask;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener, AdapterView.OnItemSelectedListener {
     private GLSurfaceView glsv_content;
     //使用OpenGL库创建一个材质(Texture)，首先是获取一个Texture Id。
     //Use the OpenGL library to create a texture.
-    private int[] textures = new int[1];//Get a texture ID.
+    private int[] textures = new int[2];//Get a texture ID.
     private int divide = 40;
     private int radius = 3;
     private float move = 0.1f;
@@ -49,7 +55,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private Bitmap mBitmap;
 
     private ImageButton btnSetting;
-    private TextView txtTitle;
+//    private TextView txtTitle;
+    private Spinner spTitle;
     private ImageButton btnDay;
     int dayNight = 0;
     private ImageButton btnRotate;
@@ -89,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private MediaProjectionManager mMediaProjectionManager;
     private MediaProjection mMediaProjection;
 
+    private long firstPressTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,17 +114,20 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         select = intentFromSelect.getIntExtra("num", 0);
         // 绑定地图 Binding map
         if (select == 0) {
-            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe1);
-            title = "Geographic Globe";
-            txtTitle.setText(title);
+            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe7);
+            title = "Physical Globe";
+            spTitle.setSelection(0);
+//            txtTitle.setText(title);
         } else if (select == 1) {
             mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe2);
-            title = "National Globe";
-            txtTitle.setText(title);
+            title = "Political Globe";
+            spTitle.setSelection(2);
+//            txtTitle.setText(title);
         } else if (select == 2) {
             mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe3);
             title = "Time Zone Globe";
-            txtTitle.setText(title);
+            spTitle.setSelection(3);
+//            txtTitle.setText(title);
         }
         //绑定View, 初始化Renderer,并设置触摸监听器
         //Bind view, initialise renderer, and set touch listener
@@ -153,18 +165,36 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         //回到界面时,显示所有控件
         //When returning to the interface, show all controls
         btnSetting.setVisibility(View.VISIBLE);
-        txtTitle.setVisibility(View.VISIBLE);
+//        txtTitle.setVisibility(View.VISIBLE);
+        spTitle.setVisibility(View.VISIBLE);
         btnDay.setVisibility(View.VISIBLE);
         btnRotate.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(System.currentTimeMillis() - firstPressTime < 2000){
+            super.onBackPressed();
+        }else {
+            Toast.makeText(MainActivity.this,"Please press again to exit application",Toast.LENGTH_SHORT).show();
+            firstPressTime = System.currentTimeMillis();
+        }
     }
 
     private void initView() {
         //将控件绑定至变量 Bind controls to variables
         btnSetting = (ImageButton) findViewById(R.id.btnSetting);
-        txtTitle = (TextView) findViewById(R.id.txtTitle);
+//        txtTitle = (TextView) findViewById(R.id.txtTitle);
+        spTitle = (Spinner) findViewById(R.id.spTitle);
         btnDay = (ImageButton) findViewById(R.id.btnDayAndNight);
         btnRotate = (ImageButton) findViewById(R.id.btnRotate);
 
+        String[] arr = {"Physical Globe","Continent Globe","Political Globe","Time Zone Globe"};
+        SpinnerAdapter adapter = new SpinnerAdapter(this,R.layout.activity_main,arr);
+        spTitle.setAdapter(adapter);
+
+        spTitle.setOnItemSelectedListener(MainActivity.this);
+//        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.array.globeMode);
         //给设置按钮添加点击监听器 Add click listener to setting button
         btnSetting.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -172,7 +202,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 intent = new Intent(MainActivity.this, Setting.class);
                 startActivity(intent);
                 btnSetting.setVisibility(View.INVISIBLE);
-                txtTitle.setVisibility(View.INVISIBLE);
+//                txtTitle.setVisibility(View.INVISIBLE);
+                spTitle.setVisibility(View.INVISIBLE);
                 btnDay.setVisibility(View.INVISIBLE);
                 btnRotate.setVisibility(View.INVISIBLE);
             }
@@ -204,9 +235,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     btnDay.setImageDrawable(getDrawable(R.drawable.dayopen));
                     Toast toast = Toast.makeText(MainActivity.this, "Display of day and night areas: Close", Toast.LENGTH_SHORT);
                     toast.show();
-
-                    Intent intent = new Intent(MainActivity.this, VRActivity.class);
-                    startActivity(intent);
                 } else {
                     btnDay.setImageDrawable(getDrawable(R.drawable.dayclose));
                     Toast toast = Toast.makeText(MainActivity.this, "Display of day and night areas: Open", Toast.LENGTH_SHORT);
@@ -267,47 +295,132 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     int g = Color.green(color);
                     int b = Color.blue(color);
 
-//                Toast toast = Toast.makeText(MainActivity.this,String.valueOf(r)+String.valueOf(g)+String.valueOf(b),Toast.LENGTH_SHORT);
-//                toast.show();
-
+                    Toast toast = Toast.makeText(MainActivity.this,String.valueOf(r)+String.valueOf(g)+String.valueOf(b),Toast.LENGTH_SHORT);
+                    toast.show();
+                    if (spTitle.getSelectedItem() == "Physical Globe"){
+                        // Pacific Ocean
+                        if ((r ==0) && (g == 255) && (b == 255)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",13);
+                            startActivity(intent);
+                        }
+                        // Atlantic Ocean
+                        if ((r ==255) && (g == 79) && (b == 168)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",14);
+                            startActivity(intent);
+                        }
+                        // Sahara desert
+                        if ((r ==86) && (g == 51) && (b == 126)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",15);
+                            startActivity(intent);
+                        }
+                        // Indian Ocean
+                        if ((r ==0) && (g == 139) && (b == 255)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",16);
+                            startActivity(intent);
+                        }
+                        // Tibetan Plateau
+                        if ((r ==0) && (g == 255) && (b == 33)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",17);
+                            startActivity(intent);
+                        }
+                    }
+                    if (spTitle.getSelectedItem() == "Continent Globe"){
+                        //asia
+                        if ((r >= 250) && (g >= 225&&g <=228) && (b >= 80&&b <=85)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",1);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        //NA
+                        if ((r >= 220&&r <=230) && (g >= 160&&g <=165) && (b >= 250)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",4);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        //SA
+                        if ((r >= 250) && (g >= 85&&g <=90) && (b >= 225&&b <=232)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",5);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        //africa
+                        if ((r >= 140&&r <=150) && (g >= 253) && (b >= 95&&b <=105)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",3);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        //EU
+                        if ((r >= 250) && (g >= 180&&g <=185) && (b >= 95&&b <=100)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",2);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        //Oceania
+                        if ((r >= 180&&r <=185) && (g >= 253) && (b <= 3)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",6);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        //Antarctica
+                        if ((r >= 253) && (g >= 253) && (b >= 230&&b <=235)) {
+                            intent = new Intent(MainActivity.this,MapActivity.class);
+                            intent.putExtra("map",7);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                    }
                     //button control
-                    //france
-                    if ((r == 0) && (g == 0) && (b >= 253)) {
-                        intent = new Intent(MainActivity.this, MapActivity.class);
-                        intent.putExtra("map", 8);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
-                    //uk
-                    if ((r >= 253) && (g == 0) && (b == 0)) {
-                        intent = new Intent(MainActivity.this, MapActivity.class);
-                        intent.putExtra("map", 9);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
-                    //russia
-                    if (color == -85326) {
+                    if (spTitle.getSelectedItem() == "Political Globe"){
+                        //france
+                        if ((r == 0) && (g == 0) && (b >= 250)) {
+                            intent = new Intent(MainActivity.this, MapActivity.class);
+                            intent.putExtra("map", 8);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        //uk
+                        if ((r >= 250) && (g == 0) && (b == 0)) {
+                            intent = new Intent(MainActivity.this, MapActivity.class);
+                            intent.putExtra("map", 9);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        //russia
+                        if (color == -85326) {
 //                if (r==255 && g==178 && b == 178){
-                        intent = new Intent(MainActivity.this, MapActivity.class);
-                        intent.putExtra("map", 10);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
-                    //us
-                    if (color == -151428) {
+                            intent = new Intent(MainActivity.this, MapActivity.class);
+                            intent.putExtra("map", 10);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        //us
+                        if (color == -151428) {
 //                if (r==255 && g==176 && b == 125){
-                        intent = new Intent(MainActivity.this, MapActivity.class);
-                        intent.putExtra("map", 11);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
+                            intent = new Intent(MainActivity.this, MapActivity.class);
+                            intent.putExtra("map", 11);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                        //china
+                        if (color == -141812) {
+                            intent = new Intent(MainActivity.this, MapActivity.class);
+                            intent.putExtra("map", 12);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
                     }
-                    //china
-                    if (color == -141812) {
-                        intent = new Intent(MainActivity.this, MapActivity.class);
-                        intent.putExtra("map", 12);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
+
                 }
 
                 mode = 0;
@@ -350,6 +463,74 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     protected void onDestroy() {
         mBitmap.recycle();
         super.onDestroy();
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+        switch (position){
+            case 0:
+                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe7);
+                break;
+            case 1:
+                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe6);
+                break;
+            case 2:
+                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe2);
+                break;
+            case 3:
+                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe3);
+                break;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+        Toast toast = Toast.makeText(this,"Nothing is selected by the user",Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    //Overwrite to change the font size and color of Spinner
+    private class SpinnerAdapter extends ArrayAdapter<String> {
+        Context context;
+        String[] items = new String[] {};
+
+        public SpinnerAdapter(final Context context, final int textViewResourceId, final String[] objects) {
+            super(context, textViewResourceId, objects);
+            this.items = objects;
+            this.context = context;
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                LayoutInflater inflater = LayoutInflater.from(context);
+                convertView = inflater.inflate(android.R.layout.simple_spinner_item, parent, false);
+            }
+
+            TextView tv = (TextView) convertView.findViewById(android.R.id.text1);
+            tv.setText(items[position]);
+            tv.setTextColor(getResources().getColor(R.color.colorPrimary));
+            tv.setTextSize(30);
+            return convertView;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                LayoutInflater inflater = LayoutInflater.from(context);
+                convertView = inflater.inflate(
+                        android.R.layout.simple_spinner_item, parent, false);
+            }
+
+            // android.R.id.text1 is default text view in resource of the android.
+            // android.R.layout.simple_spinner_item is default layout in resources of android.
+
+            TextView tv = (TextView) convertView.findViewById(android.R.id.text1);
+            tv.setText(items[position]);
+            tv.setTextColor(getResources().getColor(R.color.colorPrimary));
+            tv.setTextSize(30);
+            return convertView;
+        }
     }
 
     //Renderer class
@@ -403,9 +584,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
             // 告诉OpenGL去生成textures.textures中存放了创建的Texture ID
             // Function to generate texture
-            gl.glGenTextures(1, textures, 0);
-            //通知OpenGL库使用这个Texture
-            //Binding texture
+            gl.glGenTextures(2, textures, 0);
+//            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+//            //通知OpenGL库使用这个Texture
+//            //Binding texture
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
             //用来渲染的Texture可能比要渲染的区域大或者小,所以需要设置Texture需要放大或是缩小时OpenGL的模式
             //常用的两种模式为GL10.GL_LINEAR和GL10.GL_NEAREST。
@@ -418,10 +601,24 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             //Set texture stretch,edge processing
             gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
             gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
-            //将Bitmap资源和Texture绑定起来
-            //Bind bitmap resource and texture
+//            //将Bitmap资源和Texture绑定起来
+//            //Bind bitmap resource and texture
             GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
-//            gl.glReadPixels();
+//            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+//            gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[1]);
+//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
+//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
+//            GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap2, 0);
+//
+
+//            gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[1]);
+//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
+//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
+//            GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap2, 0);
         }
 
         //Surface尺寸改变时调用
@@ -450,6 +647,13 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         public void onDrawFrame(GL10 gl) {
             gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);//清除颜色缓冲以及深度缓冲 Clear color buffer and depth buffer
             gl.glLoadIdentity();
+
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,textures[0]);
+            GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
+
+//            GLES20.glEnable(GLES20.GL_BLEND);
+//            GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
             //这个是俯视，眼睛在y坐标5.0，球体半径为3
             //GLU.gluLookAt(gl, 0.0f, 5.0f, 15.0f
             //这个是平视，眼睛在y坐标0.0，球体半径为3
@@ -483,7 +687,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             } else {
                 gl.glScalef(origin, origin, origin);
             }
-            globe.drawGlobe(gl);//Call the globe class to draw a globe
+            globe.drawGlobe(gl,mBitmap);//Call the globe class to draw a globe
             if (isMove == true) {
                 angle = angle + move; // Auto rotate globe
             } else {

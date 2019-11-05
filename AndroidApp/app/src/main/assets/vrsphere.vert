@@ -4,8 +4,8 @@ uniform mat4 uModelMatrix;
 uniform mat4 uRotateMatrix;
 
 attribute vec3 aPosition;
-attribute vec2 aCoordinate;
 
+attribute vec2 aCoordinate;
 varying vec2 vCoordinate;
 
 void main(){

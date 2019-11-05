@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="globeMode">
+        <item>Geographic Globe</item>
+        <item>Continent Globe</item>
+        <item>National Globe</item>
+        <item>Time Zone Globe</item>
+    </string-array>
+
+</resources>

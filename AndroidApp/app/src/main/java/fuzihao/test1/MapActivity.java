@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.InputFilter;
 import android.text.method.LinkMovementMethod;
+import android.text.method.ReplacementTransformationMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 public class MapActivity extends AppCompatActivity{
 
     private Intent intent;
+    int select;
 
     private ImageView imgMap;
     private TextView txtIntroduction;
@@ -35,23 +37,26 @@ public class MapActivity extends AppCompatActivity{
     private String html = "<a href="+link+">Link to Wikipedia</a>";
     private String introduction = "World";
 
-    int select;
+    private long startTime = 0;
+    private long endTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        initView();
         intent = getIntent();
         select = intent.getIntExtra("map",0);
+
+        initView();
+
         if (select==0){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.world1));
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.globe2));
             introduction = "World";;
             txtIntroduction.setText(introduction);
             txtSimple.setText(R.string.introductionOfWorld);
         }else if (select==1){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.asia2));
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.asia));
             introduction = "Asia";
             txtIntroduction.setText(introduction);
             txtSimple.setText(R.string.introductionOfAsia);
@@ -88,6 +93,7 @@ public class MapActivity extends AppCompatActivity{
             txtIntroduction.setText(introduction);
             txtSimple.setText(R.string.introductionOfAntarctica);
         }
+
         //place image
         else if (select==8){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.france));
@@ -116,6 +122,38 @@ public class MapActivity extends AppCompatActivity{
             introduction = "China";
             txtIntroduction.setText(introduction);
             txtSimple.setText(R.string.introductionOfChina);
+        }
+
+        //physical
+        else if (select==13){
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.pacificocean));
+            introduction = "Pacific Ocean";
+            txtIntroduction.setText(introduction);
+            introduction = "Pacific_Ocean";
+            txtSimple.setText(R.string.introductionOfPacificOcean);
+        }else if (select==14){
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.atlanticocean));
+            introduction = "Atlantic Ocean";
+            txtIntroduction.setText(introduction);
+            introduction = "Atlantic_Ocean";
+            txtSimple.setText(R.string.introductionOfAtlanticOcean);
+        }else if (select==15){
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.saharadesert));
+            introduction = "Sahara";
+            txtIntroduction.setText(introduction);
+            txtSimple.setText(R.string.introductionOfSahara);
+        }else if (select==16){
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.indianocean));
+            introduction = "Indian Ocean";
+            txtIntroduction.setText(introduction);
+            introduction = "Indian_Ocean";
+            txtSimple.setText(R.string.introductionOfIndianOcean);
+        }else if (select==17){
+            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.tibetanplateau));
+            introduction = "Tibetan Plateau";
+            txtIntroduction.setText(introduction);
+            introduction = "Tibetan_Plateau";
+            txtSimple.setText(R.string.introductionOfTibetanPlateau);
         }
         link+=introduction;
         html = "<a href="+link+">Link to Wikipedia</a>";
@@ -168,6 +206,7 @@ public class MapActivity extends AppCompatActivity{
                     mode = DRAG;
                     matrix.set(imgMap.getImageMatrix());
                     startPoint.set(motionEvent.getX(),motionEvent.getY());
+                    startTime = System.currentTimeMillis();
                     break;
                 case MotionEvent.ACTION_MOVE:
                     if (mode == ZOOM) {
@@ -188,6 +227,34 @@ public class MapActivity extends AppCompatActivity{
                     break;
                 case MotionEvent.ACTION_UP:
                     mode = 0;
+                    endTime = System.currentTimeMillis();
+                    if ((endTime - startTime) < 0.1 * 1000L) {
+                        if (select==8){
+                            Intent intent = new Intent(MapActivity.this, VRActivity.class);
+                            intent.putExtra("vr",0);
+                            startActivity(intent);
+                        }
+                        if (select==9){
+                            Intent intent = new Intent(MapActivity.this, VRActivity.class);
+                            intent.putExtra("vr",1);
+                            startActivity(intent);
+                        }
+                        if (select==10){
+                            Intent intent = new Intent(MapActivity.this, VRActivity.class);
+                            intent.putExtra("vr",2);
+                            startActivity(intent);
+                        }
+                        if (select==11){
+                            Intent intent = new Intent(MapActivity.this, VRActivity.class);
+                            intent.putExtra("vr",3);
+                            startActivity(intent);
+                        }
+                        if (select==12){
+                            Intent intent = new Intent(MapActivity.this, VRActivity.class);
+                            intent.putExtra("vr",4);
+                            startActivity(intent);
+                        }
+                    }
 
                     PointF p1 = getLeftPointF(currentMatrix);
                     PointF p2 = getRightPointF(currentMatrix);
