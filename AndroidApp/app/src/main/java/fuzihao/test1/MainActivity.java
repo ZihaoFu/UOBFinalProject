@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
@@ -33,6 +34,7 @@ import android.widget.Toast;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -97,6 +99,15 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private MediaProjection mMediaProjection;
 
     private long firstPressTime;
+
+    String itemTitle;
+    String itemCapital;
+    String itemArea;
+    String itemPopulation;
+    String itemTime;
+    int itemRes;
+    int[] location = new int[2];
+    int sendValue = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -255,6 +266,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 isMove = false;
                 x = motionEvent.getX();
                 y = motionEvent.getY();
+                location[0] = Math.round(x);
+                location[1] = Math.round(y);
                 startTime = System.currentTimeMillis();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -295,135 +308,178 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     int g = Color.green(color);
                     int b = Color.blue(color);
 
-                    Toast toast = Toast.makeText(MainActivity.this,String.valueOf(r)+String.valueOf(g)+String.valueOf(b),Toast.LENGTH_SHORT);
-                    toast.show();
+//                    Toast toast = Toast.makeText(MainActivity.this,String.valueOf(r)+String.valueOf(g)+String.valueOf(b),Toast.LENGTH_SHORT);
+//                    toast.show();
+
                     if (spTitle.getSelectedItem() == "Physical Globe"){
                         // Pacific Ocean
                         if ((r ==0) && (g == 255) && (b == 255)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",13);
-                            startActivity(intent);
+                            itemTitle = "Pacific Ocean";
+                            itemArea = "165,250,000 km²";
+                            itemRes = R.drawable.pacificocean;
+                            sendValue = 13;
+                            onClickPopIcon(glsv_content);
+
                         }
                         // Atlantic Ocean
-                        if ((r ==255) && (g == 79) && (b == 168)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",14);
-                            startActivity(intent);
+                        else if ((r ==255) && (g == 79) && (b == 168)) {
+                            itemTitle = "Atlantic Ocean";
+                            itemArea = "106,460,000 km²";
+                            itemRes = R.drawable.atlanticocean;
+                            sendValue = 14;
+                            onClickPopIcon(glsv_content);
                         }
                         // Sahara desert
-                        if ((r ==86) && (g == 51) && (b == 126)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",15);
-                            startActivity(intent);
+                        else if ((r ==86) && (g == 51) && (b == 126)) {
+                            itemTitle = "Sahara desert";
+                            itemArea = "9,200,000 km²";
+                            itemRes = R.drawable.saharadesert;
+                            sendValue = 15;
+                            onClickPopIcon(glsv_content);
                         }
                         // Indian Ocean
-                        if ((r ==0) && (g == 139) && (b == 255)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",16);
-                            startActivity(intent);
+                        else if ((r ==0) && (g == 139) && (b == 255)) {
+                            itemTitle = "Indian Ocean";
+                            itemArea = "68,556,000 km²";
+                            itemRes = R.drawable.indianocean;
+                            sendValue = 16;
+                            onClickPopIcon(glsv_content);
                         }
                         // Tibetan Plateau
-                        if ((r ==0) && (g == 255) && (b == 33)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",17);
-                            startActivity(intent);
+                        else if ((r ==0) && (g == 255) && (b == 33)) {
+                            itemTitle = "Tibetan Plateau";
+                            itemArea = "2,500,000 km²";
+                            itemRes = R.drawable.tibetanplateau;
+                            sendValue = 17;
+                            onClickPopIcon(glsv_content);
                         }
                     }
-                    if (spTitle.getSelectedItem() == "Continent Globe"){
-                        //asia
+                    else if (spTitle.getSelectedItem() == "Continent Globe"){
+                        //Asia
                         if ((r >= 250) && (g >= 225&&g <=228) && (b >= 80&&b <=85)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",1);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                        }
-                        //NA
-                        if ((r >= 220&&r <=230) && (g >= 160&&g <=165) && (b >= 250)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",4);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                        }
-                        //SA
-                        if ((r >= 250) && (g >= 85&&g <=90) && (b >= 225&&b <=232)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",5);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                        }
-                        //africa
-                        if ((r >= 140&&r <=150) && (g >= 253) && (b >= 95&&b <=105)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",3);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                            itemTitle = "Asia";
+                            itemArea = "44,579,000 km²";
+                            itemPopulation = "4,462,676,731";
+                            itemRes = R.drawable.asialabel;
+                            sendValue = 1;
+                            onClickPopIcon(glsv_content);
                         }
                         //EU
-                        if ((r >= 250) && (g >= 180&&g <=185) && (b >= 95&&b <=100)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",2);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                        else if ((r >= 250) && (g >= 180&&g <=185) && (b >= 95&&b <=100)) {
+                            itemTitle = "Europe";
+                            itemArea = "10,180,000 km²";
+                            itemPopulation = "741,447,158";
+                            itemRes = R.drawable.eulabel;
+                            sendValue = 2;
+                            onClickPopIcon(glsv_content);
+                        }
+                        //Africa
+                        else if ((r >= 140&&r <=150) && (g >= 253) && (b >= 95&&b <=105)) {
+                            itemTitle = "Africa";
+                            itemArea = "30,370,000 km²";
+                            itemPopulation = "1,225,080,510";
+                            itemRes = R.drawable.africalabel;
+                            sendValue = 3;
+                            onClickPopIcon(glsv_content);
+                        }
+                        //NA
+                        else if ((r >= 220&&r <=230) && (g >= 160&&g <=165) && (b >= 250)) {
+                            itemTitle = "North America";
+                            itemArea = "24,709,000 km²";
+                            itemPopulation = "579,024,000";
+                            itemRes = R.drawable.nalabel;
+                            sendValue = 4;
+                            onClickPopIcon(glsv_content);
+                        }
+                        //SA
+                        else if ((r >= 250) && (g >= 85&&g <=90) && (b >= 225&&b <=232)) {
+                            itemTitle = "South America";
+                            itemArea = "17,850,000 km²";
+                            itemPopulation = "420,458,044";
+                            itemRes = R.drawable.salabel;
+                            sendValue = 5;
+                            onClickPopIcon(glsv_content);
                         }
                         //Oceania
-                        if ((r >= 180&&r <=185) && (g >= 253) && (b <= 3)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",6);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                        else if ((r >= 180&&r <=185) && (g >= 253) && (b <= 3)) {
+                            itemTitle = "Oceania";
+                            itemArea = "8,525,989 km²";
+                            itemPopulation = "40,117,432";
+                            itemRes = R.drawable.oceanialabel;
+                            sendValue = 6;
+                            onClickPopIcon(glsv_content);
                         }
                         //Antarctica
-                        if ((r >= 253) && (g >= 253) && (b >= 230&&b <=235)) {
-                            intent = new Intent(MainActivity.this,MapActivity.class);
-                            intent.putExtra("map",7);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                        else if ((r >= 253) && (g >= 253) && (b >= 230&&b <=235)) {
+                            itemTitle = "Antarctica";
+                            itemArea = "14,200,000 km²";
+                            itemPopulation = "1,106";
+                            itemRes = R.drawable.antarcticalabel;
+                            sendValue = 7;
+                            onClickPopIcon(glsv_content);
                         }
                     }
                     //button control
-                    if (spTitle.getSelectedItem() == "Political Globe"){
+                    else if (spTitle.getSelectedItem() == "Political Globe"){
                         //france
                         if ((r == 0) && (g == 0) && (b >= 250)) {
-                            intent = new Intent(MainActivity.this, MapActivity.class);
-                            intent.putExtra("map", 8);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                            itemTitle = "France";
+                            itemCapital = "Paris";
+                            itemArea = "640,679 km²";
+                            itemPopulation = "67,022,000";
+                            itemTime = "UTC+1, +2";
+                            itemRes = R.drawable.francelabel;
+                            sendValue = 8;
+                            onClickPopIcon(glsv_content);
                         }
                         //uk
-                        if ((r >= 250) && (g == 0) && (b == 0)) {
-                            intent = new Intent(MainActivity.this, MapActivity.class);
-                            intent.putExtra("map", 9);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                        else if ((r >= 250) && (g == 0) && (b == 0)) {
+                            itemTitle = "United Kingdom";
+                            itemCapital = "London";
+                            itemArea = "242,495 km²";
+                            itemPopulation = "67,545,757";
+                            itemTime = "UTC±0, +1";
+                            itemRes = R.drawable.uklabel;
+                            sendValue = 9;
+                            onClickPopIcon(glsv_content);
                         }
                         //russia
-                        if (color == -85326) {
+                        else if (color == -85326) {
 //                if (r==255 && g==178 && b == 178){
-                            intent = new Intent(MainActivity.this, MapActivity.class);
-                            intent.putExtra("map", 10);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                            itemTitle = "Russia";
+                            itemCapital = "Moscow";
+                            itemArea = "17,098,246 km²";
+                            itemPopulation = "146,793,744";
+                            itemTime = "UTC+2 to +12";
+                            itemRes = R.drawable.russialabel;
+                            sendValue = 10;
+                            onClickPopIcon(glsv_content);
                         }
                         //us
-                        if (color == -151428) {
+                        else if (color == -151428) {
 //                if (r==255 && g==176 && b == 125){
-                            intent = new Intent(MainActivity.this, MapActivity.class);
-                            intent.putExtra("map", 11);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                            itemTitle = "United States";
+                            itemCapital = "Washington, D.C.";
+                            itemArea = "9,833,520 km²";
+                            itemPopulation = "327,167,434";
+                            itemTime = "UTC−4 to −12, +10, +11";
+                            itemRes = R.drawable.uslabel;
+                            sendValue = 11;
+                            onClickPopIcon(glsv_content);
                         }
                         //china
-                        if (color == -141812) {
-                            intent = new Intent(MainActivity.this, MapActivity.class);
-                            intent.putExtra("map", 12);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                        else if (color == -141812) {
+                            itemTitle = "China";
+                            itemCapital = "Beijing";
+                            itemArea = "9,596,961 km²";
+                            itemPopulation = "1,403,500,365";
+                            itemTime = "UTC+8";
+                            itemRes = R.drawable.chinalabel;
+                            sendValue = 12;
+                            onClickPopIcon(glsv_content);
                         }
                     }
-
                 }
-
-                mode = 0;
                 //抬起时地球仪继续旋转
                 //The globe continues to rotate when the fingers are raised
                 timer.schedule(new TimerTask() {
@@ -436,6 +492,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                         }
                     }
                 }, 2000);
+                mode = 0;
+
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 mode = 0;
@@ -701,6 +759,59 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 //            label.draw(gl);
 //            gl.glPopMatrix();
         }
+    }
+
+    public void onClickPopIcon(View view) {
+        count = 1;
+        isMove = false;
+        btnRotate.setImageDrawable(getDrawable(R.drawable.restart));
+        Toast toast = Toast.makeText(MainActivity.this, "Automatic rotation: Close", Toast.LENGTH_SHORT);
+        toast.show();
+
+        LabelMenu labelMenu = new LabelMenu(this);
+        labelMenu.setTriangleIndicatorViewColor(Color.WHITE);
+        labelMenu.setBackgroundResource(R.drawable.label_white);
+        labelMenu.setItemTextColor(Color.BLACK);
+        labelMenu.setIsShowIcon(true);
+
+        labelMenu.setOnItemClickListener(new LabelMenu.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id, MenuItem menuItem) {
+                switch (menuItem.getItemId()){
+                    case 6:
+                        intent = new Intent(MainActivity.this,MapActivity.class);
+                        intent.putExtra("map",sendValue);
+                        startActivity(intent);
+                        break;
+                }
+            }
+        });
+        labelMenu.setMenuList(getMenuList());
+
+        labelMenu.show(glsv_content,location);
+    }
+
+    private List<MenuItem> getMenuList() {
+        List<MenuItem> list = new ArrayList<>();
+        list.add(new MenuItem(itemRes,1, itemTitle));
+        if(spTitle.getSelectedItem() == "Physical Globe"){
+            list.add(new MenuItem(R.drawable.area,3, "Area: "+itemArea));
+            list.add(new MenuItem(R.drawable.info,6, "More Info"));
+        }
+        if(spTitle.getSelectedItem() == "Continent Globe"){
+            list.add(new MenuItem(R.drawable.area,3, "Area: "+itemArea));
+            list.add(new MenuItem(R.drawable.population,4, "Population: "+itemPopulation));
+            list.add(new MenuItem(R.drawable.info,6, "More Info"));
+        }
+        if(spTitle.getSelectedItem() == "Political Globe"){
+            list.add(new MenuItem(R.drawable.capital,2, "Capital: "+itemCapital));
+            list.add(new MenuItem(R.drawable.area,3, "Area: "+itemArea));
+            list.add(new MenuItem(R.drawable.population,4, "Population: "+itemPopulation));
+            list.add(new MenuItem(R.drawable.timezone,5, "Time zone: "+itemTime));
+            list.add(new MenuItem(R.drawable.info,6, "More Info"));
+        }
+        return list;
     }
 }
 

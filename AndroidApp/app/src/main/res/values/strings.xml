@@ -7,6 +7,8 @@
     <string name="Rotate">The Switch Of Auto Switch</string>
     <string name="howToUse">How To Use</string>
     <string name="info">Information</string>
+    <string name="menuimage">Image</string>
+    <string name="menutext">Text</string>
     <string name="title1">Please select an option</string>
     <string name="geoGlobe">Physical Globe</string>
     <string name="nationGlobe">Political Globe</string>
