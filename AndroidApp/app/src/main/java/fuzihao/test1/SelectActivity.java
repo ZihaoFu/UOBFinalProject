@@ -10,8 +10,10 @@ import android.widget.TextView;
 
 public class SelectActivity extends Activity implements View.OnClickListener {
     private Button btnGeo;
+    private Button btnContinent;
     private Button btnNation;
     private Button btnTime;
+
     private Button btnWorldMap;
     private Button btnAsia;
     private Button btnEurope;
@@ -48,6 +50,7 @@ public class SelectActivity extends Activity implements View.OnClickListener {
             txtModifyTime.setVisibility(View.INVISIBLE);
         }else if(requestCode==1){
             btnGeo.setVisibility(View.INVISIBLE);
+            btnContinent.setVisibility(View.INVISIBLE);
             btnNation.setVisibility(View.INVISIBLE);
             btnTime.setVisibility(View.INVISIBLE);
             txtAuthor.setVisibility(View.INVISIBLE);
@@ -55,6 +58,7 @@ public class SelectActivity extends Activity implements View.OnClickListener {
             txtModifyTime.setVisibility(View.INVISIBLE);
         }else if(requestCode==2){
             btnGeo.setVisibility(View.INVISIBLE);
+            btnContinent.setVisibility(View.INVISIBLE);
             btnNation.setVisibility(View.INVISIBLE);
             btnTime.setVisibility(View.INVISIBLE);
             btnWorldMap.setVisibility(View.INVISIBLE);
@@ -70,6 +74,7 @@ public class SelectActivity extends Activity implements View.OnClickListener {
 
     private void initView(){
         btnGeo = (Button) findViewById(R.id.btnGeo);
+        btnContinent = (Button) findViewById(R.id.btnContinent);
         btnNation = (Button) findViewById(R.id.btnNation);
         btnTime = (Button) findViewById(R.id.btnTime);
         btnWorldMap = (Button) findViewById(R.id.btnWorldMap);
@@ -85,6 +90,7 @@ public class SelectActivity extends Activity implements View.OnClickListener {
         txtModifyTime = (TextView) findViewById(R.id.txtModifyTime);
 
         btnGeo.setOnClickListener(this);
+        btnContinent.setOnClickListener(this);
         btnNation.setOnClickListener(this);
         btnTime.setOnClickListener(this);
         btnWorldMap.setOnClickListener(this);
@@ -106,64 +112,62 @@ public class SelectActivity extends Activity implements View.OnClickListener {
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
-            case R.id.btnNation:
+            case R.id.btnContinent:
                 intent = new Intent(SelectActivity.this,MainActivity.class);
                 intent.putExtra("num",1);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
-            case R.id.btnTime:
+            case R.id.btnNation:
                 intent = new Intent(SelectActivity.this,MainActivity.class);
                 intent.putExtra("num",2);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                break;
+            case R.id.btnTime:
+                intent = new Intent(SelectActivity.this,MainActivity.class);
+                intent.putExtra("num",3);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
             case R.id.btnWorldMap:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
                 intent.putExtra("map",0);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
             case R.id.btnAsia:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
                 intent.putExtra("map",1);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
             case R.id.btnEurope:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
                 intent.putExtra("map",2);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
             case R.id.btnAfrica:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
                 intent.putExtra("map",3);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
             case R.id.btnNA:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
                 intent.putExtra("map",4);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
             case R.id.btnSA:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
                 intent.putExtra("map",5);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
             case R.id.btnOceania:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
                 intent.putExtra("map",6);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
             case R.id.btnAntarctica:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
                 intent.putExtra("map",7);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
         }

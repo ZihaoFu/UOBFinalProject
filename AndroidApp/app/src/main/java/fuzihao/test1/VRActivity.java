@@ -47,24 +47,31 @@ public class VRActivity extends AppCompatActivity implements SensorEventListener
 
         intent = getIntent();
         select = intent.getIntExtra("vr",0);
+        //fr
         if (select == 0){
             int texture = R.drawable.france360;
             vrSphere = new VrSphere(this.getApplicationContext(),texture);
         }
+        //uk
         if(select == 1){
-
+            int texture = R.drawable.panorama01;
+            vrSphere = new VrSphere(this.getApplicationContext(),texture);
         }
+        //ru
         if(select == 2){
-
+            int texture = R.drawable.panorama02;
+            vrSphere = new VrSphere(this.getApplicationContext(),texture);
         }
+        //us
         if(select == 3){
-
+            int texture = R.drawable.panorama03;
+            vrSphere = new VrSphere(this.getApplicationContext(),texture);
         }
+        //cn
         if(select == 4){
             int texture = R.drawable.panorama04;
             vrSphere = new VrSphere(this.getApplicationContext(),texture);
         }
-
     }
 
     @Override

@@ -2,11 +2,15 @@ package fuzihao.test1;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PointF;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,12 +19,35 @@ import android.text.InputFilter;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ReplacementTransformationMethod;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Calendar;
+import java.util.Map;
+
+import static android.provider.ContactsContract.CommonDataKinds.Website.URL;
 
 public class MapActivity extends AppCompatActivity{
 
@@ -32,6 +59,7 @@ public class MapActivity extends AppCompatActivity{
     private TextView txtSimple;
     private TextView txtLink;
     private ImageButton btnSetting;
+    private Switch swShow;
 
     private String link = "https://en.wikipedia.org/wiki/"; // Set a basic link
     private String html = "<a href="+link+">Link to Wikipedia</a>";
@@ -39,6 +67,8 @@ public class MapActivity extends AppCompatActivity{
 
     private long startTime = 0;
     private long endTime = 0;
+
+    WikiApi wikiApi = new WikiApi();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,44 +84,36 @@ public class MapActivity extends AppCompatActivity{
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.globe2));
             introduction = "World";;
             txtIntroduction.setText(introduction);
-            txtSimple.setText(R.string.introductionOfWorld);
         }else if (select==1){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.asia));
             introduction = "Asia";
             txtIntroduction.setText(introduction);
-            txtSimple.setText(R.string.introductionOfAsia);
         }else if (select==2){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.europe));
             introduction = "Europe";
             txtIntroduction.setText(introduction);
-            txtSimple.setText(R.string.introductionOfEurope);
         }else if (select==3){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.africa));
             introduction = "Africa";
             txtIntroduction.setText(introduction);
-            txtSimple.setText(R.string.introductionOfAfrica);
         }else if (select==4){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.north_america));
             introduction = "North America";
             txtIntroduction.setText(introduction);
             introduction = "North_America";
-            txtSimple.setText(R.string.introductionOfNA);
         }else if (select==5){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.south_america));
             introduction = "South America";
             txtIntroduction.setText(introduction);
             introduction = "South_America";
-            txtSimple.setText(R.string.introductionOfSA);
         }else if (select==6){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.australia_and_oceania));
             introduction = "Oceania";
             txtIntroduction.setText(introduction);
-            txtSimple.setText(R.string.introductionOfOceania);
         }else if (select==7){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.antarctica));
             introduction = "Antarctica";
             txtIntroduction.setText(introduction);
-            txtSimple.setText(R.string.introductionOfAntarctica);
         }
 
         //place image
@@ -99,29 +121,24 @@ public class MapActivity extends AppCompatActivity{
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.france));
             introduction = "France";
             txtIntroduction.setText(introduction);
-            txtSimple.setText(R.string.introductionOfFrance);
         }else if (select==9){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.uk));
             introduction = "United Kingdom";
             txtIntroduction.setText(introduction);
             introduction = "United_Kingdom";
-            txtSimple.setText(R.string.introductionOfUK);
         }else if (select==10){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.russia));
             introduction = "Russia";
             txtIntroduction.setText(introduction);
-            txtSimple.setText(R.string.introductionOfRussia);
         }else if (select==11){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.us));
             introduction = "United States";
             txtIntroduction.setText(introduction);
             introduction = "United_States";
-            txtSimple.setText(R.string.introductionOfUS);
         }else if (select==12){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.china));
             introduction = "China";
             txtIntroduction.setText(introduction);
-            txtSimple.setText(R.string.introductionOfChina);
         }
 
         //physical
@@ -130,31 +147,29 @@ public class MapActivity extends AppCompatActivity{
             introduction = "Pacific Ocean";
             txtIntroduction.setText(introduction);
             introduction = "Pacific_Ocean";
-            txtSimple.setText(R.string.introductionOfPacificOcean);
         }else if (select==14){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.atlanticocean));
             introduction = "Atlantic Ocean";
             txtIntroduction.setText(introduction);
             introduction = "Atlantic_Ocean";
-            txtSimple.setText(R.string.introductionOfAtlanticOcean);
         }else if (select==15){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.saharadesert));
             introduction = "Sahara";
             txtIntroduction.setText(introduction);
-            txtSimple.setText(R.string.introductionOfSahara);
         }else if (select==16){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.indianocean));
             introduction = "Indian Ocean";
             txtIntroduction.setText(introduction);
             introduction = "Indian_Ocean";
-            txtSimple.setText(R.string.introductionOfIndianOcean);
         }else if (select==17){
             imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.tibetanplateau));
             introduction = "Tibetan Plateau";
             txtIntroduction.setText(introduction);
             introduction = "Tibetan_Plateau";
-            txtSimple.setText(R.string.introductionOfTibetanPlateau);
         }
+
+        wikiApi();
+
         link+=introduction;
         html = "<a href="+link+">Link to Wikipedia</a>";
         txtLink.setMovementMethod(LinkMovementMethod.getInstance());
@@ -166,6 +181,29 @@ public class MapActivity extends AppCompatActivity{
         btnSetting.setVisibility(View.VISIBLE);
     }
 
+    //wikiapi
+    private void wikiApi(){
+        WikiApi.GetApiRes getRes = new WikiApi.GetApiRes();
+        getRes.execute("https://en.wikipedia.org/w/api.php?" +
+                "format=json" +
+                "&action=query" +
+                "&prop=extracts" +
+
+                "&explaintext=" +
+                "&titles="+introduction);
+        getRes.setOnAsyncResponse(new WikiApi.AsyncResponse() {
+            @Override
+            public void onDataReceivedSuccess(String string) {
+                txtSimple.setText(string);
+            }
+            @Override
+            public void onDataReceivedFailed() {
+                Toast toast = Toast.makeText(MapActivity.this,"data received failed!",Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
+    }
+
     //Bind controls to variables, Set click listener and touch listener
     private void initView(){
         imgMap = (ImageView) findViewById(R.id.imgMap);
@@ -173,6 +211,8 @@ public class MapActivity extends AppCompatActivity{
         txtSimple = (TextView) findViewById(R.id.txtSimple);
         txtLink = (TextView) findViewById(R.id.txtLink);
         btnSetting = (ImageButton) findViewById(R.id.btnSetting2);
+        swShow = (Switch) findViewById(R.id.swTime);
+        swShow.setChecked(true);
 
         txtSimple.setMovementMethod(ScrollingMovementMethod.getInstance());
 
@@ -185,6 +225,16 @@ public class MapActivity extends AppCompatActivity{
             }
         });
         imgMap.setOnTouchListener(new Move());
+        swShow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b){
+
+                }else{
+
+                }
+            }
+        });
     }
 
     private class Move implements View.OnTouchListener {
@@ -365,6 +415,96 @@ public class MapActivity extends AppCompatActivity{
         float leftX = values[2]+rectTemp.width()*values[0];
         float leftY = values[5]+rectTemp.height()*values[4];
         return new PointF(leftX,leftY);
+    }
+
+    String decodeSourceText(String sourceText){
+        return sourceText.toLowerCase().replace(" ","%20");
+    }
+
+    public static String GET(String url){
+        InputStream inputStream = null;
+        String result = "";
+        try {
+            // create HttpClient
+            HttpClient httpclient = new DefaultHttpClient();
+
+            // make GET request to the given URL
+            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
+
+            // receive response as inputStream
+            inputStream = httpResponse.getEntity().getContent();
+
+            // convert inputstream to string
+            if(inputStream != null)
+                result = convertInputStreamToString(inputStream);
+            else
+                result = "Did not work!";
+
+        } catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+        }
+
+        return result;
+    }
+
+    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+        String line = "";
+
+        String result = "";
+        while((line = bufferedReader.readLine()) != null)
+            result += line;
+
+        inputStream.close();
+        return result;
+    }
+
+    private class HttpAsyncTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... urls) {
+            return GET(urls[0]);
+        }
+
+        // onPostExecute displays the results of the AsyncTask.
+        @Override
+        protected void onPostExecute(String result) {
+            Toast.makeText(getBaseContext(), "Received!", Toast.LENGTH_SHORT).show();
+            String UN = "", PW = "", user = "", wikiText = "";
+            try {
+                JSONObject json = new JSONObject(result); // convert String to JSONObject
+                //JSONArray articles = json.getJSONArray("array"); // get articles array
+                JSONObject query = json.getJSONObject("query");
+                JSONObject pages = query.getJSONObject("pages");
+                //user=pages.toString();
+
+                String[] str_array = pages.toString().substring(0, 20).split(":");
+                String string1 = str_array[0];
+                String pageid = string1.substring(2, string1.length() - 1);
+                user = string1 + "\n" + pageid;
+
+
+                JSONObject page = pages.getJSONObject(pageid);
+
+                wikiText = (String) page.get("extract");
+                String[] str_array2 = wikiText.split("==");
+                wikiText = "";
+                for (String temp : str_array2) {
+                    wikiText = wikiText + "\n-----------------------------------------------\n" + temp.trim();
+                }
+
+                if (!wikiText.isEmpty()) {
+                    txtSimple.setText(wikiText.trim());
+
+                } else {
+                    txtSimple.setText("No Result Found");
+                }
+
+            } catch (JSONException e) {
+                txtSimple.setText(e.toString());
+                Toast.makeText(getBaseContext(), "JSONException!", Toast.LENGTH_SHORT).show();
+            }
+
+        }
     }
 }
 

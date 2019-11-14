@@ -32,8 +32,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -64,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private ImageButton btnRotate;
     int count = 0;
     Boolean isMove = true;
+    Boolean isDayNight = false;
 
     private long startTime = 0;
     private long endTime = 0;
@@ -130,11 +135,16 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             spTitle.setSelection(0);
 //            txtTitle.setText(title);
         } else if (select == 1) {
+                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe6);
+                title = "Continent Globe";
+                spTitle.setSelection(1);
+//            txtTitle.setText(title);
+        } else if (select == 2) {
             mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe2);
             title = "Political Globe";
             spTitle.setSelection(2);
 //            txtTitle.setText(title);
-        } else if (select == 2) {
+        } else if (select == 3) {
             mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe3);
             title = "Time Zone Globe";
             spTitle.setSelection(3);
@@ -243,13 +253,21 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             public void onClick(View view) {
                 dayNight = dayNight + 1;
                 if (dayNight % 2 == 0) {
+                    isDayNight = false;
                     btnDay.setImageDrawable(getDrawable(R.drawable.dayopen));
                     Toast toast = Toast.makeText(MainActivity.this, "Display of day and night areas: Close", Toast.LENGTH_SHORT);
                     toast.show();
                 } else {
+                    isDayNight = true;
                     btnDay.setImageDrawable(getDrawable(R.drawable.dayclose));
                     Toast toast = Toast.makeText(MainActivity.this, "Display of day and night areas: Open", Toast.LENGTH_SHORT);
                     toast.show();
+
+                    int hour = 0;
+                    double res = Math.cos(Math.PI*hour/12)*4;
+                    Toast toast2 = Toast.makeText(MainActivity.this, String.valueOf(res), Toast.LENGTH_SHORT);
+                    toast2.show();
+
                 }
             }
         });
@@ -295,7 +313,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     changex = -(newx - x);
                     changey = (newy - y);
 
-                    angle = angle + changex / 360;
+                    angle = angle - changex / 360;
                     angle2 = angle2 + changey / 360;
                 }
                 break;
@@ -623,9 +641,23 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 //            float lightAmbient[] = new float[]{0.3f, 0.3f, 0.3f, 1};//环境光
 //            float lightDiffuse[] = new float[]{1, 1, 1, 1};//漫射光
 //            float lightPos[] = new float[]{1, 1, 1, 1};//位置
-//            gl.glEnable(GL10.GL_LIGHTING);//禁用颜色抖动 消除可能性的性能高消耗
-//            gl.glEnable(GL10.GL_LIGHT0);//设置清除颜色缓冲区时用的RGBA颜色值
-//
+//            gl.glEnable(GL10.GL_LIGHTING);//启用灯光总开关
+//            gl.glEnable(GL10.GL_LIGHT0);//启用第0盏灯
+//            gl.glEnable(GL10.GL_LIGHT1);//启用第0盏灯
+//            gl.glEnable(GL10.GL_LIGHT2);//启用第0盏灯
+//            gl.glEnable(GL10.GL_LIGHT3);//启用第0盏灯
+//            gl.glEnable(GL10.GL_LIGHT4);//启用第0盏灯
+//            gl.glEnable(GL10.GL_LIGHT5);//启用第0盏灯
+//            gl.glEnable(GL10.GL_LIGHT6);//启用第0盏灯
+//            gl.glEnable(GL10.GL_LIGHT7);//启用第0盏灯
+//            gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_DIFFUSE, new float[] { 1.0f, 1.0f, 1.0f, 1.0f }, 0);
+//            gl.glLightfv(GL10.GL_LIGHT1, GL10.GL_AMBIENT, new float[] { 1.0f, 1.0f, 1.0f, 1.0f }, 0);
+//            gl.glLightfv(GL10.GL_LIGHT2, GL10.GL_AMBIENT, new float[] { 1.0f, 1.0f, 1.0f, 1.0f }, 0);
+//            gl.glLightfv(GL10.GL_LIGHT3, GL10.GL_AMBIENT, new float[] { 1.0f, 1.0f, 1.0f, 1.0f }, 0);
+//            gl.glLightfv(GL10.GL_LIGHT4, GL10.GL_AMBIENT, new float[] { 1.0f, 1.0f, 1.0f, 1.0f }, 0);
+//            gl.glLightfv(GL10.GL_LIGHT5, GL10.GL_AMBIENT, new float[] { 1.0f, 1.0f, 1.0f, 1.0f }, 0);
+//            gl.glLightfv(GL10.GL_LIGHT6, GL10.GL_AMBIENT, new float[] { 1.0f, 1.0f, 1.0f, 1.0f }, 0);
+//            gl.glLightfv(GL10.GL_LIGHT7, GL10.GL_AMBIENT, new float[] { 1.0f, 1.0f, 1.0f, 1.0f }, 0);
 //             //设置环境光
 //            gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_AMBIENT, lightAmbient, 0);
 //            //设置漫射光
@@ -662,21 +694,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 //            //将Bitmap资源和Texture绑定起来
 //            //Bind bitmap resource and texture
             GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
-//            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
-//            gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[1]);
-//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
-//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
-//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
-//            GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap2, 0);
-//
-
-//            gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[1]);
-//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
-//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
-//            gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
-//            GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap2, 0);
         }
 
         //Surface尺寸改变时调用
@@ -723,6 +740,28 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             //Set the position of the eyes, a position where the eyes are facing and the direction of the head
             GLU.gluLookAt(gl, 0.0f, 0.0f, 80.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
+            if (isDayNight){
+                //get system time
+                Calendar calendar = Calendar.getInstance();
+                int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                //calculate the change of direction
+                float lightX = (float) (Math.cos(Math.PI*hour/12)*5);
+                float lightY = (float) (Math.sin(Math.PI*hour/12)*5);
+
+                gl.glEnable(GL10.GL_LIGHTING);//启用灯光总开关
+                gl.glEnable(GL10.GL_LIGHT0);//启用第0盏灯
+                gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_AMBIENT, new float[] {0.1f, 0.1f, 0.1f, 1}, 0);
+                gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_DIFFUSE, new float[] { 1.0f, 1.0f, 1.0f, 0.5f }, 0);
+                gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_POSITION, new float[]{-lightX, 0, lightY, 0}, 0);
+//                gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_SPOT_DIRECTION, new float[] { 0, 0, 0 },0);
+//                gl.glLightf(GL10.GL_LIGHT0, GL10.GL_SPOT_CUTOFF, 45f);
+//                gl.glLightf(GL10.GL_LIGHT0, GL10.GL_SPOT_EXPONENT, 50f);
+            }else
+            {
+                gl.glDisable(GL10.GL_LIGHTING);
+                gl.glDisable(GL10.GL_LIGHT0);
+            }
+
             // 设置旋转动画 Set rotation angle and direction (gestures)
             if (angle2 >= 60) {
                 angle2 = 60.0f;
@@ -733,7 +772,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             } else {
                 gl.glRotatef(angle2, 1, 0, 0);
             }
-            gl.glRotatef(-angle, 0, 1, 0);
+            gl.glRotatef(angle, 0, 1, 0);
 
             // 设置缩放动画 Set zoom ratio(gestures)
             if (origin >= 5.0f) {
@@ -752,12 +791,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 angle = angle;
             }
 
+
+
             //add label
-//            GLU.gluLookAt(gl,0.0f, 0.0f, 3.01f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-//            gl.glPushMatrix();
-//            gl.glScalef(3f,3f,3f);
-//            label.draw(gl);
-//            gl.glPopMatrix();
+
         }
     }
 
