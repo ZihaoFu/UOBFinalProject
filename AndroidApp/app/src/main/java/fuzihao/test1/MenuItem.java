@@ -1,7 +1,10 @@
 package fuzihao.test1;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+
 public class MenuItem {
-    public int iconResId;
+    public Drawable iconResId;
     public int itemId;
     public String itemTitle;
 
@@ -10,13 +13,13 @@ public class MenuItem {
         this.itemTitle = itemTitle;
     }
 
-    public MenuItem(int iconResId, int itemId, String itemTitle) {
+    public MenuItem(Drawable iconResId, int itemId, String itemTitle) {
         this.iconResId = iconResId;
         this.itemId = itemId;
         this.itemTitle = itemTitle;
     }
 
-    public int getIconResId() {
+    public Drawable getIconResId() {
         return iconResId;
     }
 

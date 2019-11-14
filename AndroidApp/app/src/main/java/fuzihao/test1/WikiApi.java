@@ -1,10 +1,7 @@
 package fuzihao.test1;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -17,12 +14,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
-
-import static android.content.ContentValues.TAG;
 
 public class WikiApi{
 //    public String getRes() {

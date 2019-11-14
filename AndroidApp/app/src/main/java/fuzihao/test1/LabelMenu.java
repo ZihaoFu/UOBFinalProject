@@ -3,6 +3,7 @@ package fuzihao.test1;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -355,7 +356,7 @@ public class LabelMenu {
 //        int digitAndLetterCount = getDigitLetterCount(text);
 //        int chLength = text.length() - digitAndLetterCount;
 //        return chLength * textSize + digitAndLetterCount * textSize * 2 / 3;
-        return text.length()* textSize/2;
+        return text.length() * textSize/1.9f;
     }
 
 //    private int getDigitLetterCount(String text) {
@@ -408,7 +409,8 @@ public class LabelMenu {
             }
             holder.iconIv.setVisibility(isShowIcon ? View.VISIBLE : View.GONE);
             if (isShowIcon) {
-                holder.iconIv.setImageResource(getItem(position).iconResId);
+                holder.iconIv.setImageDrawable(getItem(position).iconResId);
+//                holder.iconIv.setImageResource(getItem(position).iconResId);
             }
             holder.textTv.setText(getItem(position).itemTitle);
             if (itemTextColor != 0) {
