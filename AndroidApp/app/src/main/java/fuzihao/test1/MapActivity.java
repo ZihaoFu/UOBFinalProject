@@ -1,5 +1,6 @@
 package fuzihao.test1;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -11,6 +12,8 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -53,6 +56,9 @@ public class MapActivity extends AppCompatActivity{
 
     private Intent intent;
     int select;
+    String selectString;
+    String selectCode;
+    Drawable itemRes;
 
     private ImageView imgMap;
     private TextView txtIntroduction;
@@ -76,105 +82,71 @@ public class MapActivity extends AppCompatActivity{
         setContentView(R.layout.activity_map);
 
         intent = getIntent();
-        select = intent.getIntExtra("map",0);
+        selectString = intent.getStringExtra("country");
 
         initView();
 
-        if (select==0){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.globe2));
-            introduction = "World";;
-            txtIntroduction.setText(introduction);
-        }else if (select==1){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.asia));
-            introduction = "Asia";
-            txtIntroduction.setText(introduction);
-        }else if (select==2){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.europe));
-            introduction = "Europe";
-            txtIntroduction.setText(introduction);
-        }else if (select==3){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.africa));
-            introduction = "Africa";
-            txtIntroduction.setText(introduction);
-        }else if (select==4){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.north_america));
-            introduction = "North America";
-            txtIntroduction.setText(introduction);
-            introduction = "North_America";
-        }else if (select==5){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.south_america));
-            introduction = "South America";
-            txtIntroduction.setText(introduction);
-            introduction = "South_America";
-        }else if (select==6){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.australia_and_oceania));
-            introduction = "Oceania";
-            txtIntroduction.setText(introduction);
-        }else if (select==7){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.antarctica));
-            introduction = "Antarctica";
-            txtIntroduction.setText(introduction);
-        }
+        Toast.makeText(MapActivity.this,selectString,Toast.LENGTH_SHORT).show();
 
-        //place image
-        else if (select==8){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.france));
-            introduction = "France";
-            txtIntroduction.setText(introduction);
-        }else if (select==9){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.uk));
-            introduction = "United Kingdom";
-            txtIntroduction.setText(introduction);
-            introduction = "United_Kingdom";
-        }else if (select==10){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.russia));
-            introduction = "Russia";
-            txtIntroduction.setText(introduction);
-        }else if (select==11){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.us));
-            introduction = "United States";
-            txtIntroduction.setText(introduction);
-            introduction = "United_States";
-        }else if (select==12){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.china));
-            introduction = "China";
-            txtIntroduction.setText(introduction);
-        }
-
-        //physical
-        else if (select==13){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.pacificocean));
-            introduction = "Pacific Ocean";
-            txtIntroduction.setText(introduction);
-            introduction = "Pacific_Ocean";
-        }else if (select==14){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.atlanticocean));
-            introduction = "Atlantic Ocean";
-            txtIntroduction.setText(introduction);
-            introduction = "Atlantic_Ocean";
-        }else if (select==15){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.saharadesert));
-            introduction = "Sahara";
-            txtIntroduction.setText(introduction);
-        }else if (select==16){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.indianocean));
-            introduction = "Indian Ocean";
-            txtIntroduction.setText(introduction);
-            introduction = "Indian_Ocean";
-        }else if (select==17){
-            imgMap.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.tibetanplateau));
-            introduction = "Tibetan Plateau";
-            txtIntroduction.setText(introduction);
-            introduction = "Tibetan_Plateau";
+        introduction = selectString;
+        txtIntroduction.setText(introduction);
+        String introduction1 = introduction.toLowerCase().replaceAll(" ","");
+        String introduction2 = introduction.toLowerCase().replaceAll(" ","_");
+        try {
+            int resid = getResources().getIdentifier("map"+introduction1, "drawable", getPackageName());
+            if (resid == 0){
+                selectCode = intent.getStringExtra("code");
+                new Thread(){
+                    @Override
+                    public void run() {
+                        try{
+                            Bitmap result = get(selectCode);
+                            Message msg=Message.obtain();
+                            msg.what=0x11;
+                            msg.obj=result;
+                            handler.sendMessage(msg);
+                        }catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }.start();
+                imgMap.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            }else{
+                imgMap.setImageResource(resid);
+            }
+        }catch (Exception e){
+            Toast.makeText(MapActivity.this,"fail",Toast.LENGTH_SHORT).show();
         }
 
         wikiApi();
 
-        link+=introduction;
+        link+=introduction2;
         html = "<a href="+link+">Link to Wikipedia</a>";
         txtLink.setMovementMethod(LinkMovementMethod.getInstance());
         txtLink.setText(Html.fromHtml(html));
     }
+
+    private Bitmap get(String name) throws Exception {
+        //定义一个url输入流，将图片地址放入
+        URL url = new URL("https://www.countryflags.io/"+name+"/flat/64.png");
+        //定义一个 InputStream 获取url的输入流（或者直接将url.openStream放入decodeStream解析成bitmap）
+        InputStream is=url.openStream();
+        Bitmap bitmap = BitmapFactory.decodeStream(is);
+        is.close();
+        return bitmap;
+    }
+
+    private Handler handler=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case 0x11:
+                    itemRes = new BitmapDrawable((Bitmap) msg.obj);
+                    imgMap.setImageDrawable(itemRes);
+                    break;
+            }
+        }
+    };
 
     public void onResume() {
         super.onResume();

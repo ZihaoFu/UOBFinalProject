@@ -1,7 +1,6 @@
 package fuzihao.test1;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,9 +13,11 @@ import android.hardware.display.DisplayManager;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
 import android.opengl.GLES20;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,12 +28,10 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.textclassifier.TextLinks;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -40,30 +39,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.idescout.sql.SqlScoutServer;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import static fuzihao.test1.FloatingMusicPlayerService.btnMusic;
 
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener, AdapterView.OnItemSelectedListener {
     private GLSurfaceView glsv_content;
@@ -119,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private Globe globe = new Globe();
 //    private circle label = new circle();
 
+    private static final int REQUEST_FLOATING_BUTTON = 0;
     private static final int REQUEST_MEDIA_PROJECTION = 1;
     private MediaProjectionManager mMediaProjectionManager;
     private MediaProjection mMediaProjection;
@@ -139,12 +128,15 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     String name;
     int id;
+    String sendString="";
+    String sendCode="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        SqlScoutServer.create(this, getPackageName());
+//        SQLiteStudioService.instance().start(this);
+//        SqlScoutServer.create(this, getPackageName());
 
         mMediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         assert mMediaProjectionManager != null;
@@ -187,13 +179,42 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == REQUEST_MEDIA_PROJECTION) {
+        if (requestCode == REQUEST_FLOATING_BUTTON) {
+            if (!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "Authorization failure", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Authorization success", Toast.LENGTH_SHORT).show();
+                startService(new Intent(MainActivity.this, FloatingMusicPlayerService.class));
+            }
+        }
+        else if (requestCode == REQUEST_MEDIA_PROJECTION) {
             if (resultCode != Activity.RESULT_OK) {
                 Toast.makeText(this, "User cancelled!", Toast.LENGTH_SHORT).show();
                 return;
             }
             mMediaProjection = mMediaProjectionManager.getMediaProjection(resultCode, data);
             setUpVirtualDisplay();
+        }
+    }
+
+    public void startFloatingMusic(View view) {
+        if (FloatingMusicPlayerService.isStarted) {
+            FloatingMusicPlayerService.isStarted = false;
+            FloatingMusicPlayerService.windowManager.removeView(btnMusic);
+            FloatingMusicPlayerService.player.stop();
+            FloatingMusicPlayerService.player = new Player();
+            Intent intent = new Intent(MainActivity.this, FloatingMusicPlayerService.class);
+            intent.putExtra("code",name);
+            startService(intent);
+            return;
+        }
+        if (!Settings.canDrawOverlays(this)) {
+            Toast.makeText(this, "No permission at present, please authorize!", Toast.LENGTH_SHORT).show();
+            startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 0);
+        } else {
+            Intent intent = new Intent(MainActivity.this, FloatingMusicPlayerService.class);
+            intent.putExtra("code",name);
+            startService(intent);
         }
     }
 
@@ -223,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     @Override
     public void onBackPressed() {
         if(System.currentTimeMillis() - firstPressTime < 2000){
+            FloatingMusicPlayerService.windowManager.removeView(btnMusic);
             super.onBackPressed();
         }else {
             Toast.makeText(MainActivity.this,"Please press again to exit application",Toast.LENGTH_SHORT).show();
@@ -370,129 +392,45 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
                     Toast toast = Toast.makeText(MainActivity.this,String.valueOf(r)+String.valueOf(g)+String.valueOf(b),Toast.LENGTH_SHORT);
                     toast.show();
-
-                    if (spTitle.getSelectedItem() == "Physical Globe"){
-                        // Pacific Ocean
-                        if ((r ==0) && (g == 255) && (b == 255)) {
-                            itemTitle = "Pacific Ocean";
-                            itemArea = "165,250,000 km²";
-                            itemRes = getDrawable(R.drawable.pacificocean);
-                            sendValue = 13;
-                            onClickPopIcon(glsv_content);
-
+                    try{
+                        String sql="";
+                        if (spTitle.getSelectedItem() == "Physical Globe"){
+                            sql = getResources().getString(R.string.physicalsqlsearch,r,g,b);
                         }
-                        // Atlantic Ocean
-                        else if ((r ==255) && (g == 79) && (b == 168)) {
-                            itemTitle = "Atlantic Ocean";
-                            itemArea = "106,460,000 km²";
-                            itemRes = getDrawable(R.drawable.atlanticocean);
-                            sendValue = 14;
-                            onClickPopIcon(glsv_content);
+                        if (spTitle.getSelectedItem() == "Continent Globe"){
+                            sql = getResources().getString(R.string.continentsqlsearch,r,g,b);
                         }
-                        // Sahara desert
-                        else if ((r ==86) && (g == 51) && (b == 126)) {
-                            itemTitle = "Sahara desert";
-                            itemArea = "9,200,000 km²";
-                            itemRes = getDrawable(R.drawable.saharadesert);
-                            sendValue = 15;
-                            onClickPopIcon(glsv_content);
+                        if (spTitle.getSelectedItem() == "Political Globe") {
+                            sql = getResources().getString(R.string.politicalsqlsearch,r,g,b);
                         }
-                        // Indian Ocean
-                        else if ((r ==0) && (g == 139) && (b == 255)) {
-                            itemTitle = "Indian Ocean";
-                            itemArea = "68,556,000 km²";
-                            itemRes = getDrawable(R.drawable.indianocean);
-                            sendValue = 16;
-                            onClickPopIcon(glsv_content);
-                        }
-                        // Tibetan Plateau
-                        else if ((r ==0) && (g == 255) && (b == 33)) {
-                            itemTitle = "Tibetan Plateau";
-                            itemArea = "2,500,000 km²";
-                            itemRes = getDrawable(R.drawable.tibetanplateau);
-                            sendValue = 17;
-                            onClickPopIcon(glsv_content);
-                        }
-                    }
-                    else if (spTitle.getSelectedItem() == "Continent Globe"){
-                        //Asia
-                        if ((r >= 250) && (g >= 225&&g <=228) && (b >= 80&&b <=85)) {
-                            itemTitle = "Asia";
-                            itemArea = "44,579,000 km²";
-                            itemPopulation = "4,462,676,731";
-                            itemRes = getDrawable(R.drawable.asialabel);
-                            sendValue = 1;
-                            onClickPopIcon(glsv_content);
-                        }
-                        //EU
-                        else if ((r >= 250) && (g >= 180&&g <=185) && (b >= 95&&b <=100)) {
-                            itemTitle = "Europe";
-                            itemArea = "10,180,000 km²";
-                            itemPopulation = "741,447,158";
-                            itemRes = getDrawable(R.drawable.eulabel);
-                            sendValue = 2;
-                            onClickPopIcon(glsv_content);
-                        }
-                        //Africa
-                        else if ((r >= 140&&r <=150) && (g >= 253) && (b >= 95&&b <=105)) {
-                            itemTitle = "Africa";
-                            itemArea = "30,370,000 km²";
-                            itemPopulation = "1,225,080,510";
-                            itemRes = getDrawable(R.drawable.africalabel);
-                            sendValue = 3;
-                            onClickPopIcon(glsv_content);
-                        }
-                        //NA
-                        else if ((r >= 220&&r <=230) && (g >= 160&&g <=165) && (b >= 250)) {
-                            itemTitle = "North America";
-                            itemArea = "24,709,000 km²";
-                            itemPopulation = "579,024,000";
-                            itemRes = getDrawable(R.drawable.nalabel);
-                            sendValue = 4;
-                            onClickPopIcon(glsv_content);
-                        }
-                        //SA
-                        else if ((r >= 250) && (g >= 85&&g <=90) && (b >= 225&&b <=232)) {
-                            itemTitle = "South America";
-                            itemArea = "17,850,000 km²";
-                            itemPopulation = "420,458,044";
-                            itemRes = getDrawable(R.drawable.salabel);
-                            sendValue = 5;
-                            onClickPopIcon(glsv_content);
-                        }
-                        //Oceania
-                        else if ((r >= 180&&r <=185) && (g >= 253) && (b <= 3)) {
-                            itemTitle = "Oceania";
-                            itemArea = "8,525,989 km²";
-                            itemPopulation = "40,117,432";
-                            itemRes = getDrawable(R.drawable.oceanialabel);
-                            sendValue = 6;
-                            onClickPopIcon(glsv_content);
-                        }
-                        //Antarctica
-                        else if ((r >= 253) && (g >= 253) && (b >= 230&&b <=235)) {
-                            itemTitle = "Antarctica";
-                            itemArea = "14,200,000 km²";
-                            itemPopulation = "1,106";
-                            itemRes = getDrawable(R.drawable.antarcticalabel);
-                            sendValue = 7;
-                            onClickPopIcon(glsv_content);
-                        }
-                    }
-                    //button control
-                    else if (spTitle.getSelectedItem() == "Political Globe") {
-                        try{
-                            String sql = getResources().getString(R.string.sqlsearch,r,g,b);
-                            Cursor cursor = db.rawQuery(sql, null);
-                            if (cursor!=null){
-                                cursor.moveToFirst();//转移到结果的第一行
-                                while (!cursor.isAfterLast()) {
-                                    id = cursor.getInt(cursor.getColumnIndex("id"));
+                        Cursor cursor = db.rawQuery(sql, null);
+                        if (cursor!=null){
+                            cursor.moveToFirst();//转移到结果的第一行
+                            while (!cursor.isAfterLast()) {
+                                id = cursor.getInt(cursor.getColumnIndex("id"));
+                                if (spTitle.getSelectedItem() == "Physical Globe"){
+                                    itemTitle = cursor.getString(cursor.getColumnIndex("title"));
+                                    itemArea = String.valueOf(cursor.getInt(cursor.getColumnIndex("area")))+ " km² ";
+                                    String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
+                                    int resid = getResources().getIdentifier("map"+itemTitle1, "drawable", getPackageName());
+                                    itemRes = getDrawable(resid);
+                                    sendString = itemTitle;
+                                    onClickPopIcon(glsv_content);
+                                }
+                                if (spTitle.getSelectedItem() == "Continent Globe"){
+                                    itemTitle = cursor.getString(cursor.getColumnIndex("title"));
+                                    itemArea = String.valueOf(cursor.getInt(cursor.getColumnIndex("area")))+ " km²";
+                                    itemPopulation = String.valueOf(cursor.getInt(cursor.getColumnIndex("population")));
+                                    String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
+                                    int resid = getResources().getIdentifier("label"+itemTitle1, "drawable", getPackageName());
+                                    itemRes = getDrawable(resid);
+                                    sendString = itemTitle;
+                                    onClickPopIcon(glsv_content);
+                                }
+                                if (spTitle.getSelectedItem() == "Political Globe") {
                                     name = cursor.getString(cursor.getColumnIndex("name"));
                                     Toast.makeText(MainActivity.this,name,Toast.LENGTH_SHORT).show();
-                                    itemTitle = name;
                                     name = name.toLowerCase();
-
                                     new Thread(){
                                         @Override
                                         public void run() {
@@ -508,15 +446,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                                         }
                                     }.start();
                                     countryApi(name);
-                                    cursor.moveToNext();
                                 }
-                            }else
-                            {
-                                Toast.makeText(MainActivity.this,"Can not find anything!",Toast.LENGTH_SHORT).show();
+                                cursor.moveToNext();
                             }
-                        }catch (Exception e){
-                            Toast.makeText(MainActivity.this,"Search Error!",Toast.LENGTH_SHORT).show();
+                        }else {
+                            Toast.makeText(MainActivity.this,"Can not find anything!",Toast.LENGTH_SHORT).show();
                         }
+                    }catch (Exception e){
+                        Toast.makeText(MainActivity.this,"Search Error!",Toast.LENGTH_SHORT).show();
                     }
                 }
                 //抬起时地球仪继续旋转
@@ -567,28 +504,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         }
     };
 
-    public Bitmap getHttpBitmap(String url)
-    {
-        DefaultHttpClient httpclient = new DefaultHttpClient();
-        HttpGet httpget = new HttpGet(url);
-        try{
-            HttpResponse resp = httpclient.execute(httpget);
-            if (HttpStatus.SC_OK == resp.getStatusLine().getStatusCode()) {
-                // 将返回内容转换为bitmap
-                HttpEntity entity = resp.getEntity();
-                InputStream in = entity.getContent();
-                Bitmap mBitmap = BitmapFactory.decodeStream(in);
-                // 向handler发送消息，执行显示图片操作
-                return mBitmap;
-            }
-        }catch (Exception e){
-
-        }finally {
-            httpclient.getConnectionManager().shutdown();
-        }
-        return null;
-    }
-
     //countryapi
     private void countryApi(final String name){
         CountryApi.GetCountryApiRes getCountryRes = new CountryApi.GetCountryApiRes();
@@ -600,9 +515,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 //                Toast.makeText(MainActivity.this,result,Toast.LENGTH_SHORT).show();
                 String [] arr = result.split("-");
 
+                sendCode = name;
+                sendString = arr[0];
                 itemTitle = arr[0];
                 itemCapital = arr[1];
-                itemArea = arr[3] + " km²";
+                itemArea = arr[3]+ " km²";
                 itemPopulation = arr[2];
                 itemTime = arr[4];
 
@@ -641,7 +558,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe6);
                 break;
             case 2:
-                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe2);
+                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe9);
                 break;
             case 3:
                 mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe3);
@@ -850,7 +767,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         count = 1;
         isMove = false;
         btnRotate.setImageDrawable(getDrawable(R.drawable.restart));
-        Toast toast = Toast.makeText(MainActivity.this, "Automatic rotation: Close", Toast.LENGTH_SHORT);
+        final Toast toast = Toast.makeText(MainActivity.this, "Automatic rotation: Close", Toast.LENGTH_SHORT);
         toast.show();
 
         LabelMenu labelMenu = new LabelMenu(this);
@@ -865,8 +782,12 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id, MenuItem menuItem) {
                 switch (menuItem.getItemId()){
                     case 6:
+                        startFloatingMusic(glsv_content);
+                        break;
+                    case 7:
                         intent = new Intent(MainActivity.this,MapActivity.class);
-                        intent.putExtra("map",sendValue);
+                        intent.putExtra("country",sendString);
+                        intent.putExtra("code",sendCode);
                         startActivity(intent);
                         break;
                 }
@@ -882,19 +803,20 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         list.add(new MenuItem(itemRes,1, itemTitle));
         if(spTitle.getSelectedItem() == "Physical Globe"){
             list.add(new MenuItem(getDrawable(R.drawable.area),3, "Area: "+itemArea));
-            list.add(new MenuItem(getDrawable(R.drawable.info),6, "More Info"));
+            list.add(new MenuItem(getDrawable(R.drawable.info),7, "More Info"));
         }
         if(spTitle.getSelectedItem() == "Continent Globe"){
             list.add(new MenuItem(getDrawable(R.drawable.area),3, "Area: "+itemArea));
             list.add(new MenuItem(getDrawable(R.drawable.population),4, "Population: "+itemPopulation));
-            list.add(new MenuItem(getDrawable(R.drawable.info),6, "More Info"));
+            list.add(new MenuItem(getDrawable(R.drawable.info),7, "More Info"));
         }
         if(spTitle.getSelectedItem() == "Political Globe"){
             list.add(new MenuItem(getDrawable(R.drawable.capital),2, "Capital: "+itemCapital));
             list.add(new MenuItem(getDrawable(R.drawable.area),3, "Area: "+itemArea));
             list.add(new MenuItem(getDrawable(R.drawable.population),4, "Population: "+itemPopulation));
-            list.add(new MenuItem(getDrawable(R.drawable.timezone),5, "Time zone: "+itemTime));
-            list.add(new MenuItem(getDrawable(R.drawable.info),6, "More Info"));
+            list.add(new MenuItem(getDrawable(R.drawable.timezone),5, "Time Zone: "+itemTime));
+            list.add(new MenuItem(getDrawable(R.drawable.music),6, "National Anthem"));
+            list.add(new MenuItem(getDrawable(R.drawable.info),7, "More Info"));
         }
         return list;
     }
