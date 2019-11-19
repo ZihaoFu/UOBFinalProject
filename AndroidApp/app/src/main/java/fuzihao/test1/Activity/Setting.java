@@ -1,17 +1,13 @@
-package fuzihao.test1;
+package fuzihao.test1.Activity;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import fuzihao.test1.R;
 
 public class Setting extends Activity implements View.OnClickListener {
     private Intent intent;
@@ -62,7 +58,7 @@ public class Setting extends Activity implements View.OnClickListener {
     public void onClick(View v){
         switch (v.getId()){
             case R.id.btnGlobe:
-                intent = new Intent(Setting.this,SelectActivity.class);
+                intent = new Intent(Setting.this, SelectActivity.class);
                 intent.putExtra("num",0);
                 startActivity(intent);
                 break;

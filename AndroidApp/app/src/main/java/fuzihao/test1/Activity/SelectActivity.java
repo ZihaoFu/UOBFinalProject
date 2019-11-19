@@ -1,12 +1,15 @@
-package fuzihao.test1;
+package fuzihao.test1.Activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import fuzihao.test1.R;
 
 public class SelectActivity extends Activity implements View.OnClickListener {
     private Button btnGeo;
@@ -26,8 +29,17 @@ public class SelectActivity extends Activity implements View.OnClickListener {
     private TextView txtAuthor;
     private TextView txtVersion;
     private TextView txtModifyTime;
+    private ImageView imageView1;
+    private ImageView imageView2;
+    private ImageView imageView3;
+    private ImageView imageView4;
+    private ImageView imageView5;
+    private ImageView imageView6;
+    private ImageView imageView7;
 
     private Intent intent;
+
+    Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +60,13 @@ public class SelectActivity extends Activity implements View.OnClickListener {
             txtAuthor.setVisibility(View.INVISIBLE);
             txtVersion.setVisibility(View.INVISIBLE);
             txtModifyTime.setVisibility(View.INVISIBLE);
+            imageView1.setVisibility(View.INVISIBLE);
+            imageView2.setVisibility(View.INVISIBLE);
+            imageView3.setVisibility(View.INVISIBLE);
+            imageView4.setVisibility(View.INVISIBLE);
+            imageView5.setVisibility(View.INVISIBLE);
+            imageView6.setVisibility(View.INVISIBLE);
+            imageView7.setVisibility(View.INVISIBLE);
         }else if(requestCode==1){
             btnGeo.setVisibility(View.INVISIBLE);
             btnContinent.setVisibility(View.INVISIBLE);
@@ -56,6 +75,13 @@ public class SelectActivity extends Activity implements View.OnClickListener {
             txtAuthor.setVisibility(View.INVISIBLE);
             txtVersion.setVisibility(View.INVISIBLE);
             txtModifyTime.setVisibility(View.INVISIBLE);
+            imageView1.setVisibility(View.INVISIBLE);
+            imageView2.setVisibility(View.INVISIBLE);
+            imageView3.setVisibility(View.INVISIBLE);
+            imageView4.setVisibility(View.INVISIBLE);
+            imageView5.setVisibility(View.INVISIBLE);
+            imageView6.setVisibility(View.INVISIBLE);
+            imageView7.setVisibility(View.INVISIBLE);
         }else if(requestCode==2){
             btnGeo.setVisibility(View.INVISIBLE);
             btnContinent.setVisibility(View.INVISIBLE);
@@ -85,9 +111,17 @@ public class SelectActivity extends Activity implements View.OnClickListener {
         btnSA = (Button) findViewById(R.id.btnSA);
         btnOceania = (Button) findViewById(R.id.btnOceania);
         btnAntarctica = (Button) findViewById(R.id.btnAntarctica);
+
         txtAuthor = (TextView) findViewById(R.id.txtAuthor);
         txtVersion = (TextView) findViewById(R.id.txtVersion);
         txtModifyTime = (TextView) findViewById(R.id.txtModifyTime);
+        imageView1 = (ImageView) findViewById(R.id.imageView);
+        imageView2 = (ImageView) findViewById(R.id.imageView2);
+        imageView3 = (ImageView) findViewById(R.id.imageView3);
+        imageView4 = (ImageView) findViewById(R.id.imageView4);
+        imageView5 = (ImageView) findViewById(R.id.imageView5);
+        imageView6 = (ImageView) findViewById(R.id.imageView6);
+        imageView7 = (ImageView) findViewById(R.id.imageView7);
 
         btnGeo.setOnClickListener(this);
         btnContinent.setOnClickListener(this);
@@ -101,13 +135,20 @@ public class SelectActivity extends Activity implements View.OnClickListener {
         btnSA.setOnClickListener(this);
         btnOceania.setOnClickListener(this);
         btnAntarctica.setOnClickListener(this);
+        imageView1.setOnClickListener(this);
+        imageView2.setOnClickListener(this);
+        imageView3.setOnClickListener(this);
+        imageView4.setOnClickListener(this);
+        imageView5.setOnClickListener(this);
+        imageView6.setOnClickListener(this);
+        imageView7.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnGeo:
-                intent = new Intent(SelectActivity.this,MainActivity.class);
+                intent = new Intent(SelectActivity.this, MainActivity.class);
                 intent.putExtra("num",0);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
@@ -131,43 +172,78 @@ public class SelectActivity extends Activity implements View.OnClickListener {
                 startActivity(intent);
                 break;
             case R.id.btnWorldMap:
-                intent = new Intent(SelectActivity.this,MapActivity.class);
-                intent.putExtra("map",0);
+                intent = new Intent(SelectActivity.this, MapActivity.class);
+                intent.putExtra("country","World");
                 startActivity(intent);
                 break;
             case R.id.btnAsia:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
-                intent.putExtra("map",1);
+                intent.putExtra("country","Asia");
                 startActivity(intent);
                 break;
             case R.id.btnEurope:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
-                intent.putExtra("map",2);
+                intent.putExtra("country","Europe");
                 startActivity(intent);
                 break;
             case R.id.btnAfrica:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
-                intent.putExtra("map",3);
+                intent.putExtra("country","Africa");
                 startActivity(intent);
                 break;
             case R.id.btnNA:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
-                intent.putExtra("map",4);
+                intent.putExtra("country","North America");
                 startActivity(intent);
                 break;
             case R.id.btnSA:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
-                intent.putExtra("map",5);
+                intent.putExtra("country","South America");
                 startActivity(intent);
                 break;
             case R.id.btnOceania:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
-                intent.putExtra("map",6);
+                intent.putExtra("country","Oceania");
                 startActivity(intent);
                 break;
             case R.id.btnAntarctica:
                 intent = new Intent(SelectActivity.this,MapActivity.class);
-                intent.putExtra("map",7);
+                intent.putExtra("country","Antarctica");
+                startActivity(intent);
+                break;
+            case R.id.imageView:
+                uri = Uri.parse("http://ontheworldmap.com/");    //设置跳转的网站
+                intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                break;
+            case R.id.imageView2:
+                uri = Uri.parse("https://iconmonstr.com/");    //设置跳转的网站
+                intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                break;
+            case R.id.imageView3:
+                uri = Uri.parse("https://www.mediawiki.org/wiki/API:Main_page");    //设置跳转的网站
+                intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                break;
+            case R.id.imageView4:
+                uri = Uri.parse("https://rapidapi.com/");    //设置跳转的网站
+                intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                break;
+            case R.id.imageView5:
+                uri = Uri.parse("https://www.countryflags.io/");    //设置跳转的网站
+                intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                break;
+            case R.id.imageView6:
+                uri = Uri.parse("http://www.nationalanthems.info/");    //设置跳转的网站
+                intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                break;
+            case R.id.imageView7:
+                uri = Uri.parse("https://developers.google.com/places/web-service/intro");    //设置跳转的网站
+                intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
         }

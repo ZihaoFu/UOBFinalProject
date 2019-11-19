@@ -8,7 +8,7 @@
         android:required="true" />
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -18,25 +18,31 @@
         android:supportsRtl="true"
         android:theme="@style/myTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".VRActivity"
-            android:theme="@style/myTheme"/>
+
         <activity
-            android:name=".MapActivity"
+            android:name=".Activity.PhotoWallActivity"
             android:theme="@style/myTheme" />
         <activity
-            android:name=".SelectActivity"
+            android:name=".Activity.VRActivity"
+            android:theme="@style/myTheme" />
+        <activity
+            android:name=".Activity.MapActivity"
+            android:theme="@style/myTheme" />
+        <activity
+            android:name=".Activity.SelectActivity"
             android:theme="@style/Transparent" />
         <activity
-            android:name=".Setting"
+            android:name=".Activity.Setting"
             android:theme="@style/Transparent" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".Activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".FloatingMusicPlayerService"></service>
+
+        <service android:name=".Music.FloatingMusicPlayerService" />
     </application>
 
 </manifest>

@@ -1,9 +1,11 @@
-package fuzihao.test1;
+package fuzihao.test1.Label;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.widget.LinearLayout;
+
+import fuzihao.test1.R;
 
 public class LabelMenuLayout extends LinearLayout {
     private TriangleIndicatorView triangleIndicatorViewUp;

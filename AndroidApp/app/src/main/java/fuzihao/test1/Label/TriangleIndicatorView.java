@@ -1,4 +1,4 @@
-package fuzihao.test1;
+package fuzihao.test1.Label;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,6 +6,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.View;
+
+import fuzihao.test1.R;
 
 /**
  * 三角形指示器

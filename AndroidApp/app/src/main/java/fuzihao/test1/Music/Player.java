@@ -1,9 +1,13 @@
-package fuzihao.test1;
+package fuzihao.test1.Music;
 
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 
-public class Player implements MediaPlayer.OnPreparedListener{
+import fuzihao.test1.R;
+
+import static fuzihao.test1.Music.FloatingMusicPlayerService.btnMusic;
+
+public class Player implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
     public MediaPlayer mediaPlayer;
     public Player(){
         try {
@@ -24,6 +28,12 @@ public class Player implements MediaPlayer.OnPreparedListener{
             mediaPlayer.reset();
             mediaPlayer.setDataSource(videoUrl);
             mediaPlayer.prepare();//prepare之后自动播放
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    btnMusic.setImageResource(R.drawable.musicplay);
+                }
+            });
         } catch (Exception e) {
         }
     }
@@ -44,5 +54,9 @@ public class Player implements MediaPlayer.OnPreparedListener{
     @Override
     public void onPrepared(MediaPlayer arg0) {
         arg0.start();
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer arg0) {
     }
 }

@@ -1,4 +1,4 @@
-package fuzihao.test1;
+package fuzihao.test1.Model;
 
 import android.content.Context;
 import android.content.res.Resources;

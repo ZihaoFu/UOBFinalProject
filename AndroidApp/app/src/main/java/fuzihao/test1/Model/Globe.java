@@ -1,4 +1,4 @@
-package fuzihao.test1;
+package fuzihao.test1.Model;
 
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;

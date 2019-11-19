@@ -1,9 +1,8 @@
-package fuzihao.test1;
+package fuzihao.test1.Label;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,6 +21,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
+
+import fuzihao.test1.R;
 
 public class LabelMenu {
     private static final int MIN_MARGIN_linearLayout = 5;

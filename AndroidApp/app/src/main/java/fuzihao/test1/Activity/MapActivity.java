@@ -1,30 +1,26 @@
-package fuzihao.test1;
+package fuzihao.test1.Activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.InputFilter;
 import android.text.method.LinkMovementMethod;
-import android.text.method.ReplacementTransformationMethod;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -32,31 +28,23 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.Calendar;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
 
-import static android.provider.ContactsContract.CommonDataKinds.Website.URL;
+import fuzihao.test1.Api.GoogleMapPhotoApi;
+import fuzihao.test1.Api.WikiApi;
+import fuzihao.test1.R;
+
+import static fuzihao.test1.Api.GoogleMapPhotoApi.selectID;
 
 public class MapActivity extends AppCompatActivity{
 
     private Intent intent;
     int select;
     String selectString;
+    String selectglobe;
     String selectCode;
     Drawable itemRes;
 
@@ -74,7 +62,14 @@ public class MapActivity extends AppCompatActivity{
     private long startTime = 0;
     private long endTime = 0;
 
-    WikiApi wikiApi = new WikiApi();
+    String[] goToOtherMap = new String[]{"World","Asia","Europe","Africa","North America","South America","Oceania","Antarctica"};
+    List<String> goToOtherMapList;
+
+    float screenHeight;
+    float screenWidth;
+    int mapHeight;
+    int mapWidth;
+    float mapScale;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,10 +78,11 @@ public class MapActivity extends AppCompatActivity{
 
         intent = getIntent();
         selectString = intent.getStringExtra("country");
+        selectglobe = intent.getStringExtra("globe");
+
+        goToOtherMapList = Arrays.asList(goToOtherMap);
 
         initView();
-
-        Toast.makeText(MapActivity.this,selectString,Toast.LENGTH_SHORT).show();
 
         introduction = selectString;
         txtIntroduction.setText(introduction);
@@ -112,10 +108,22 @@ public class MapActivity extends AppCompatActivity{
                 }.start();
                 imgMap.setScaleType(ImageView.ScaleType.FIT_CENTER);
             }else{
-                imgMap.setImageResource(resid);
+                WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
+                screenHeight = wm.getDefaultDisplay().getHeight();
+                screenWidth = wm.getDefaultDisplay().getWidth();
+                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), resid);
+                mapHeight = bitmap.getHeight();
+                mapWidth = bitmap.getWidth();
+                mapScale = screenWidth/ (float) mapWidth;
+//                int height = Math.round(mapHeight*mapScale);
+//                int width = Math.round(mapWidth*mapScale);
+                Matrix matrix = new Matrix();
+                matrix.postScale(mapScale, mapScale);
+                Bitmap resizeBitmap = Bitmap.createBitmap(bitmap, 0, 0, mapWidth, mapHeight, matrix, true);
+                imgMap.setImageBitmap(resizeBitmap);
             }
         }catch (Exception e){
-            Toast.makeText(MapActivity.this,"fail",Toast.LENGTH_SHORT).show();
+            Toast.makeText(MapActivity.this,"Get image resource failed",Toast.LENGTH_SHORT).show();
         }
 
         wikiApi();
@@ -151,6 +159,11 @@ public class MapActivity extends AppCompatActivity{
     public void onResume() {
         super.onResume();
         btnSetting.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 
     //wikiapi
@@ -191,7 +204,7 @@ public class MapActivity extends AppCompatActivity{
         btnSetting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                intent=new Intent(MapActivity.this,Setting.class);
+                intent=new Intent(MapActivity.this, Setting.class);
                 startActivity(intent);
                 btnSetting.setVisibility(View.INVISIBLE);
             }
@@ -251,74 +264,58 @@ public class MapActivity extends AppCompatActivity{
                     mode = 0;
                     endTime = System.currentTimeMillis();
                     if ((endTime - startTime) < 0.1 * 1000L) {
-                        if (select==8){
-                            Intent intent = new Intent(MapActivity.this, VRActivity.class);
-                            intent.putExtra("vr",0);
-                            startActivity(intent);
-                        }
-                        if (select==9){
-                            Intent intent = new Intent(MapActivity.this, VRActivity.class);
-                            intent.putExtra("vr",1);
-                            startActivity(intent);
-                        }
-                        if (select==10){
-                            Intent intent = new Intent(MapActivity.this, VRActivity.class);
-                            intent.putExtra("vr",2);
-                            startActivity(intent);
-                        }
-                        if (select==11){
-                            Intent intent = new Intent(MapActivity.this, VRActivity.class);
-                            intent.putExtra("vr",3);
-                            startActivity(intent);
-                        }
-                        if (select==12){
-                            Intent intent = new Intent(MapActivity.this, VRActivity.class);
-                            intent.putExtra("vr",4);
-                            startActivity(intent);
+                        try {
+                            if (selectglobe.equals("click")) {
+                                final String apiKey = "AIzaSyBbmKXXOLKFsICWeJkFWtp4Z9Jy9RtljX4";
+
+                                selectID = 0;
+                                GoogleMapPhotoApi.GetGoogleMapPhotoApiRes getCountryRes = new GoogleMapPhotoApi.GetGoogleMapPhotoApiRes();
+                                getCountryRes.execute("https://maps.googleapis.com/maps/api/place/findplacefromtext/json?key=" + apiKey + "&input=" + txtIntroduction.getText() + "&inputtype=textquery&fields=place_id");
+                                getCountryRes.setOnAsyncResponse(new GoogleMapPhotoApi.AsyncResponse() {
+                                    @Override
+                                    public void onDataReceivedSuccess(String string) {
+                                        Intent intent = new Intent(MapActivity.this, PhotoWallActivity.class);
+                                        intent.putExtra("placeName", txtIntroduction.getText());
+                                        intent.putExtra("placeid", string);
+                                        startActivity(intent);
+                                    }
+
+                                    @Override
+                                    public void onDataReceivedFailed() {
+
+                                    }
+                                });
+                            }
+                        }catch (Exception e){
+                            Toast.makeText(MapActivity.this,"This map does not have image page",Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     PointF p1 = getLeftPointF(currentMatrix);
                     PointF p2 = getRightPointF(currentMatrix);
 
-                    //左边界复位
-                    if(p1.x>0 && p1.x<=imgMap.getWidth()/2){
-                        currentMatrix.postTranslate(-p1.x,0);
-                    }
-                    //拉过一半时操作前往上一张图像
                     if(p1.x>imgMap.getWidth()/2){
-                        if(select==0){
-                            intent = new Intent(MapActivity.this,MapActivity.class);
-                            intent.putExtra("map",7);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                        //左边界复位
+                        if(p1.x>0 && p1.x<=imgMap.getWidth()/2){
+                            currentMatrix.postTranslate(-p1.x,0);
                         }
-                        if(select>0&&select<=7){
-                            intent = new Intent(MapActivity.this,MapActivity.class);
-                            intent.putExtra("map",select-1);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+
+                        //右边界复位
+                        if(p2.x<imgMap.getWidth() && p2.x>=imgMap.getWidth()/2){
+                            currentMatrix.postTranslate(imgMap.getWidth()-p2.x,0);
                         }
-                    }
-                    //右边界复位
-                    if(p2.x<imgMap.getWidth() && p2.x>=imgMap.getWidth()/2){
-                        currentMatrix.postTranslate(imgMap.getWidth()-p2.x,0);
-                    }
-                    //拉过一半时操作前往下一张图像
-                    if(p2.x<imgMap.getWidth()/2){
-                        if(select==7){
-                            intent = new Intent(MapActivity.this,MapActivity.class);
-                            intent.putExtra("map",0);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                    }else{
+                        //左边界复位
+                        if(p1.x>0 && p1.x<=imgMap.getWidth()){
+                            currentMatrix.postTranslate(-p1.x,0);
                         }
-                        if(select<7){
-                            intent = new Intent(MapActivity.this,MapActivity.class);
-                            intent.putExtra("map",select+1);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+
+                        //右边界复位
+                        if(p2.x<imgMap.getWidth() && p2.x>=imgMap.getWidth()){
+                            currentMatrix.postTranslate(imgMap.getWidth()-p2.x,0);
                         }
                     }
+
                     //上下边界复位
                     if(p2.y-p1.y>imgMap.getHeight()){
                         //上边界复位
@@ -333,6 +330,43 @@ public class MapActivity extends AppCompatActivity{
                         float row = (imgMap.getHeight()-(p2.y-p1.y))/2;
                         currentMatrix.postTranslate(0,row-p1.y);
                     }
+
+                    if(goToOtherMapList.contains(txtIntroduction.getText().toString())){
+                        int positon = Arrays.binarySearch(goToOtherMap, txtIntroduction.getText().toString());
+
+                        //拉过一半时操作前往上一张图像
+                        if(p1.x>imgMap.getWidth()/2){
+                            if(positon==0){
+                                intent = new Intent(MapActivity.this,MapActivity.class);
+                                intent.putExtra("country",goToOtherMap[7]);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }
+                            if(positon>0&&positon<=7){
+                                intent = new Intent(MapActivity.this,MapActivity.class);
+                                intent.putExtra("country",goToOtherMap[positon-1]);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }
+                        }
+
+                        //拉过一半时操作前往下一张图像
+                        if(p2.x<imgMap.getWidth()/2){
+                            if(positon==7){
+                                intent = new Intent(MapActivity.this,MapActivity.class);
+                                intent.putExtra("country",goToOtherMap[0]);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }
+                            if(positon<7){
+                                intent = new Intent(MapActivity.this,MapActivity.class);
+                                intent.putExtra("country",goToOtherMap[positon+1]);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }
+                        }
+                    }
+
                     break;
                 case MotionEvent.ACTION_POINTER_UP:
                     mode = 0;

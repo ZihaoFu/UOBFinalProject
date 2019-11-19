@@ -1,23 +1,23 @@
-package fuzihao.test1;
+package fuzihao.test1.Music;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.media.MediaPlayer;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.io.IOException;
+import fuzihao.test1.R;
 
 public class FloatingMusicPlayerService extends Service {
     public static boolean isStarted = false;
@@ -84,8 +84,6 @@ public class FloatingMusicPlayerService extends Service {
     private void showFloatingWindow() {
         isStarted = true;
 
-
-
         if (Settings.canDrawOverlays(this)) {
             btnMusic = new ImageButton(getApplicationContext());
             btnMusic.setImageDrawable(getDrawable(R.drawable.musicplay));
@@ -94,19 +92,6 @@ public class FloatingMusicPlayerService extends Service {
 
             btnMusic.setOnTouchListener(new FloatingOnTouchListener());
         }
-
-//        if (Settings.canDrawOverlays(this)) {
-//            LayoutInflater layoutInflater = LayoutInflater.from(this);
-//            displayView = layoutInflater.inflate(R.layout.image_button, null);
-//
-//            btnMusic = displayView.findViewById(R.id.btnMusic);
-//            btnMusic.setImageDrawable(getDrawable(R.drawable.musicplay));
-//            btnMusic.setBackgroundColor(Color.BLUE);
-//            txtMusic = displayView.findViewById(R.id.txtMusic);
-//            txtMusic.setText("ok");
-//            windowManager.addView(displayView, layoutParams);
-//            displayView.setOnTouchListener(new FloatingOnTouchListener());
-//        }
     }
 
     private class FloatingOnTouchListener implements View.OnTouchListener {
@@ -147,29 +132,9 @@ public class FloatingMusicPlayerService extends Service {
                             }else{
                                 player.play();
                             }
-
-
-
-//                            try {
-//                                mediaPlayer.setDataSource("http://www.nationalanthems.info/"+selectCode+".mp3");
-//                                //3 准备播放
-//                                mediaPlayer.prepareAsync();
-//                                //3.1 设置一个准备完成的监听
-//                                mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-//                                    @Override
-//                                    public void onPrepared(MediaPlayer mp) {
-//                                        // 4 开始播放
-//                                        mediaPlayer.start();
-//                                    }
-//                                });
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
                         }else {
                             btnMusic.setImageDrawable(getDrawable(R.drawable.musicplay));
                             player.pause();
-//                            mediaPlayer.stop();
-//                            mediaPlayer.release();
                         }
                         isPlay = isPlay + 1;
 

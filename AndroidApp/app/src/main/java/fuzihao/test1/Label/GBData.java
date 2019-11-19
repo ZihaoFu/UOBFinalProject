@@ -1,4 +1,4 @@
-package fuzihao.test1;
+package fuzihao.test1.Label;
 
 import android.graphics.Bitmap;
 import android.media.Image;
@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 
 public class GBData {
         private static final String TAG = "GBData";
-        static ImageReader reader;
+        public static ImageReader reader;
         private static Bitmap bitmap;
 
         public static int getColor(int x, int y) {

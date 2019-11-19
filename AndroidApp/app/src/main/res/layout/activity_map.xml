@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    tools:context=".MapActivity">
+    tools:context=".Activity.MapActivity">
 
     <ImageView
         android:id="@+id/imgMap"
@@ -16,7 +16,7 @@
         android:layout_marginEnd="0dp"
         android:contentDescription="@string/map"
         android:scaleType="matrix"
-        android:src="@drawable/world1"
+        android:src="@drawable/mapworld"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

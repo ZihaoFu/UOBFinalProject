@@ -1,4 +1,4 @@
-package fuzihao.test1;
+package fuzihao.test1.SqlDatabase;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
