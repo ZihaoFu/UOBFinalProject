@@ -20,7 +20,8 @@ import static fuzihao.test1.BuildConfig.DEBUG;
 
 public class VrSphere {
     private static final float UNIT_SIZE = 1f;// 单位尺寸
-    private float radius = 2f; // 球的半径
+    public static float radius;
+//    private float radius = 2f; // 球的半径
 
     final double angleSpan = Math.PI/90f;// 将球进行单位切分的角度
     int vCount = 0;// 顶点个数，先初始化为0
@@ -50,9 +51,9 @@ public class VrSphere {
     private int vSize;
     private float skyRate=0.2f;
 
-    public VrSphere(Context context, int texture){
+    public VrSphere(Context context, Bitmap texture){
         this.resources = context.getResources();
-        bitmap = BitmapFactory.decodeResource(resources,texture);
+        bitmap = texture;
     }
 
     public void create(){

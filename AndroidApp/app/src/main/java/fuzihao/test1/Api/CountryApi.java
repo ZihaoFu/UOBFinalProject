@@ -1,5 +1,7 @@
 package fuzihao.test1.Api;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 
 import org.json.JSONArray;
@@ -14,16 +16,39 @@ public class CountryApi {
         void onDataReceivedFailed();
     }
 
-    public static class GetCountryApiRes extends AsyncTask<String, Void, String> {
+    public static class GetCountryApiRes extends AsyncTask<String, Integer, String> {
         CountryApi.AsyncResponse asyncResponse;
+        private Context mContext;
+        ProgressDialog pd;
 
         public void setOnAsyncResponse(CountryApi.AsyncResponse asyncResponse) {
             this.asyncResponse = asyncResponse;
         }
 
+        public GetCountryApiRes(Context context){
+            mContext = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            pd = new ProgressDialog(mContext);
+            pd.setMax(1);
+            pd.setTitle("Tips");
+            pd.setMessage("Loading the label, please wait...");
+            pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            pd.show();
+        }
+
         @Override
         protected String doInBackground(String... urls) {
             return GET(urls[0]);
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            pd.setIndeterminate(false);
+            pd.setProgress(values[0]);
+            super.onProgressUpdate(values);
         }
 
         @Override
@@ -34,13 +59,12 @@ public class CountryApi {
 
             String res = "";
             try {
+                pd.dismiss();
                 JSONObject jsonObject = new JSONObject(result);
-//                JSONArray jsonArray=new JSONArray(result);
-//                JSONObject object=jsonArray.getJSONObject(0);
                 String name = jsonObject.getString("name");
                 String capital = jsonObject.getString("capital");
-//                String region = jsonObject.getString("region");
-//                String subregion = jsonObject.getString("subregion");
+                String region = jsonObject.getString("region");
+                String subregion = jsonObject.getString("subregion");
                 String population = String.valueOf(jsonObject.getInt("population"));
                 String area = String.valueOf(jsonObject.getInt("area"));
                 JSONArray timezones = jsonObject.getJSONArray("timezones");
@@ -48,20 +72,19 @@ public class CountryApi {
                     String time = timezones.getString(i);
                     timeZone = timeZone + time;
                 }
-//                JSONArray currencies = jsonObject.getJSONArray("currencies");
-//                for (int j = 0; j < currencies.length(); j++) {
-//                    String currency = currencies.getString(j);
-//                    currencyRes = currencyRes + currency;
-//                }
-//                JSONArray languages = jsonObject.getJSONArray("languages");
-//                for (int k = 0; k < languages.length(); k++) {
-//                    String languagesString = languages.getString(k);
-//                    languageRes = languageRes + languagesString;
-//                }
+                JSONArray currencies = jsonObject.getJSONArray("currencies");
+                for (int j = 0; j < currencies.length(); j++) {
+                    String currency = currencies.getString(j);
+                    currencyRes = currencyRes + currency;
+                }
+                JSONArray languages = jsonObject.getJSONArray("languages");
+                for (int k = 0; k < languages.length(); k++) {
+                    String languagesString = languages.getString(k);
+                    languageRes = languageRes + languagesString;
+                }
                 if(!name.isEmpty())
                 {
-//                    res = name + "-" + capital + "-" + region + "-" + subregion + "-" + population + "-" + area + "-" + timeZone + "-" + currencyRes + "-" + languageRes;
-                    res = name + "-" + capital + "-" + population + "-" + area + "-" + timeZone;
+                    res = name + "@" + capital + "@" + population + "@" + area + "@" + timeZone + "@" + region + "@" + subregion + "@" + currencyRes + "@" + languageRes;
                     asyncResponse.onDataReceivedSuccess(res);
                 }
                 else{

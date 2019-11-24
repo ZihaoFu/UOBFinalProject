@@ -10,6 +10,6 @@
         android:id="@+id/item_photo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:srcCompat="@drawable/area"
+        app:srcCompat="@drawable/iconarea"
         />
 </LinearLayout>

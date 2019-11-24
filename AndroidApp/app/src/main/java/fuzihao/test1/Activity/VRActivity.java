@@ -2,6 +2,9 @@ package fuzihao.test1.Activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -10,12 +13,15 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
+import fuzihao.test1.Api.GoogleGetPhoto;
+import fuzihao.test1.Api.GoogleMapPhotoApi;
 import fuzihao.test1.Model.VrSphereRender;
 import fuzihao.test1.R;
 import fuzihao.test1.Model.VrSphere;
@@ -28,6 +34,7 @@ public class VRActivity extends AppCompatActivity implements SensorEventListener
     private float[] rotationMatrix = new float[16];
 
     public static VrSphere vrSphere;
+    Bitmap bitmap;
 
     private Intent intent;
     String select;
@@ -51,29 +58,25 @@ public class VRActivity extends AppCompatActivity implements SensorEventListener
         select = intent.getStringExtra("vr");
         //fr
         if (select.equals("France")){
-            int texture = R.drawable.france360;
-            vrSphere = new VrSphere(this.getApplicationContext(),texture);
+            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.france360);
         }
         //uk
         if(select.equals("United Kingdom")){
-            int texture = R.drawable.panorama01;
-            vrSphere = new VrSphere(this.getApplicationContext(),texture);
+            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama01);
         }
         //ru
         if(select.equals("Russia")){
-            int texture = R.drawable.panorama02;
-            vrSphere = new VrSphere(this.getApplicationContext(),texture);
+            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama02);
         }
         //us
         if(select.equals("United States")){
-            int texture = R.drawable.panorama03;
-            vrSphere = new VrSphere(this.getApplicationContext(),texture);
+            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama03);
         }
         //cn
         if(select.equals("China")){
-            int texture = R.drawable.panorama04;
-            vrSphere = new VrSphere(this.getApplicationContext(),texture);
+            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama04);
         }
+        vrSphere = new VrSphere(this.getApplicationContext(),bitmap);
     }
 
     @Override

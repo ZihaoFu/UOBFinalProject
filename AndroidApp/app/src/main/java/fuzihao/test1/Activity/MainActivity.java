@@ -14,7 +14,6 @@ import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
-import android.opengl.GLES20;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
@@ -25,8 +24,6 @@ import android.os.Bundle;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLU;
-import android.opengl.GLUtils;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -43,15 +40,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
 import fuzihao.test1.Api.CountryApi;
+import fuzihao.test1.Api.GoogleGetCountryCode;
 import fuzihao.test1.Label.GBData;
 import fuzihao.test1.Model.Globe;
 import fuzihao.test1.Label.LabelMenu;
@@ -62,10 +56,13 @@ import fuzihao.test1.Music.Player;
 import fuzihao.test1.R;
 import fuzihao.test1.SqlDatabase.MySQLiteOpenHelper;
 
+import static fuzihao.test1.Model.GlobeRender.latitude;
+import static fuzihao.test1.Model.GlobeRender.longitude;
 import static fuzihao.test1.Music.FloatingMusicPlayerService.btnMusic;
 
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener, AdapterView.OnItemSelectedListener {
     private GLSurfaceView glsv_content;
+    final String API_KEY = "AIzaSyBbmKXXOLKFsICWeJkFWtp4Z9Jy9RtljX4";
     //使用OpenGL库创建一个材质(Texture)，首先是获取一个Texture Id。
     //Use the OpenGL library to create a texture.
     private int[] textures = new int[2];//Get a texture ID.
@@ -111,9 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     Timer timer = new Timer();
 
-    //Call other classes
     public static Globe globe = new Globe();
-//    private circle label = new circle();
 
     private static final int REQUEST_FLOATING_BUTTON = 0;
     private static final int REQUEST_MEDIA_PROJECTION = 1;
@@ -127,6 +122,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     String itemArea = "";
     String itemPopulation = "";
     String itemTime = "";
+    String itemRegion = "";
+    String itemCurrencyRes = "";
+    String itemLanguageRes = "";
+
     Drawable itemRes;
     int[] location = new int[2];
     int sendValue = 0;
@@ -138,6 +137,9 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     int id;
     String sendString="";
     String sendCode="";
+
+    float lat;
+    float lon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,29 +158,25 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         select = intentFromSelect.getIntExtra("num", 0);
         // 绑定地图 Binding map
         if (select == 0) {
-            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe7);
+            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe1);
             title = "Physical Globe";
             spTitle.setSelection(0);
-//            txtTitle.setText(title);
         } else if (select == 1) {
-                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe6);
+                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe2);
                 title = "Continent Globe";
                 spTitle.setSelection(1);
-//            txtTitle.setText(title);
         } else if (select == 2) {
-            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe9);
+            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe3);
             title = "Political Globe";
             spTitle.setSelection(2);
-//            txtTitle.setText(title);
         } else if (select == 3) {
-            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe3);
+            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe4);
             title = "Time Zone Globe";
             spTitle.setSelection(3);
-//            txtTitle.setText(title);
         }
         //绑定View, 初始化Renderer,并设置触摸监听器
         //Bind view, initialise renderer, and set touch listener
-        glsv_content = (GLSurfaceView) findViewById(R.id.glsv_content);
+        glsv_content = findViewById(R.id.glsv_content);
         glsv_content.setRenderer(new GlobeRender());
         glsv_content.setOnTouchListener(this);
     }
@@ -241,7 +239,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         //回到界面时,显示所有控件
         //When returning to the interface, show all controls
         btnSetting.setVisibility(View.VISIBLE);
-//        txtTitle.setVisibility(View.VISIBLE);
         spTitle.setVisibility(View.VISIBLE);
         btnDay.setVisibility(View.VISIBLE);
         btnRotate.setVisibility(View.VISIBLE);
@@ -260,11 +257,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     private void initView() {
         //将控件绑定至变量 Bind controls to variables
-        btnSetting = (ImageButton) findViewById(R.id.btnSetting);
+        btnSetting = findViewById(R.id.btnSetting);
 //        txtTitle = (TextView) findViewById(R.id.txtTitle);
-        spTitle = (Spinner) findViewById(R.id.spTitle);
-        btnDay = (ImageButton) findViewById(R.id.btnDayAndNight);
-        btnRotate = (ImageButton) findViewById(R.id.btnRotate);
+        spTitle = findViewById(R.id.spTitle);
+        btnDay = findViewById(R.id.btnDayAndNight);
+        btnRotate = findViewById(R.id.btnRotate);
 
         String[] arr = {"Physical Globe","Continent Globe","Political Globe","Time Zone Globe"};
         SpinnerAdapter adapter = new SpinnerAdapter(this,R.layout.activity_main,arr);
@@ -318,30 +315,12 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     btnDay.setImageDrawable(getDrawable(R.drawable.dayclose));
                     Toast toast = Toast.makeText(MainActivity.this, "Display of day and night areas: Open", Toast.LENGTH_SHORT);
                     toast.show();
-
-//                    int hour = 0;
-//                    double res = Math.cos(Math.PI*hour/12)*4;
-
-//                    Toast toast2 = Toast.makeText(MainActivity.this, String.valueOf(res), Toast.LENGTH_SHORT);
-//                    toast2.show();
-
                 }
             }
         });
 
         mySQLiteOpenHelper = new MySQLiteOpenHelper(MainActivity.this,"colorPosition.db");
-//        mySQLiteOpenHelper.getWritableDatabase();
         db = mySQLiteOpenHelper.getWritableDatabase();
-//        db.execSQL("delete from color");
-//        ContentValues values = new ContentValues();
-//        values.put("name","france");
-//        values.put("red1",0);
-//        values.put("red2",5);
-//        values.put("green1",0);
-//        values.put("green2",5);
-//        values.put("blue1",250);
-//        values.put("blue2",255);
-//        db.insert("color",null,values);
     }
 
     //Touch action
@@ -352,9 +331,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         }
         final float normalizedX = (motionEvent.getX() / view.getWidth()) * 2 - 1;
         final float normalizedY = -((motionEvent.getY() / view.getHeight()) * 2 - 1);
-
-
-
 
         switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
@@ -368,12 +344,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 location[1] = Math.round(y);
                 startTime = System.currentTimeMillis();
 
-                glsv_content.queueEvent(new Runnable() {
-                    @Override
-                    public void run() {
-                        GlobeRender.handleTouchDown(normalizedX,normalizedY);
-                    }
-                });
                 break;
             case MotionEvent.ACTION_MOVE:
                 isMove = false;
@@ -403,17 +373,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     angle = angle - changex / 360;
                     angle2 = angle2 + changey / 360;
                 }
-
-                glsv_content.queueEvent(new Runnable() {
-                    @Override
-                    public void run() {
-                        GlobeRender.handleTouchMove(normalizedX,normalizedY);
-                    }
-                });
                 break;
             case MotionEvent.ACTION_UP:
                 endTime = System.currentTimeMillis();
                 if ((endTime - startTime) < 0.1 * 1000L) {
+                    GlobeRender.handleTouchDown(normalizedX,normalizedY);
+                    lat = latitude;
+                    lon = longitude;
+
                     int color = GBData.getColor(Math.round(x), Math.round(y));
                     int a = Color.alpha(color);
                     int r = Color.red(color);
@@ -422,69 +389,71 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
                     //display color data
                     Toast toast = Toast.makeText(MainActivity.this,String.valueOf(r)+String.valueOf(g)+String.valueOf(b),Toast.LENGTH_SHORT);
-                    toast.show();
+//                    toast.show();
 
                     try{
                         String sql="";
-                        if (spTitle.getSelectedItem() == "Physical Globe"){
-                            sql = getResources().getString(R.string.physicalsqlsearch,r,g,b);
-                        }
-                        if (spTitle.getSelectedItem() == "Continent Globe"){
-                            sql = getResources().getString(R.string.continentsqlsearch,r,g,b);
-                        }
-                        if (spTitle.getSelectedItem() == "Political Globe") {
-                            sql = getResources().getString(R.string.politicalsqlsearch,r,g,b);
-                        }
-                        Cursor cursor = db.rawQuery(sql, null);
-                        if (cursor!=null){
-                            cursor.moveToFirst();//转移到结果的第一行
-                            while (!cursor.isAfterLast()) {
-                                id = cursor.getInt(cursor.getColumnIndex("id"));
-                                if (spTitle.getSelectedItem() == "Physical Globe"){
-                                    itemTitle = cursor.getString(cursor.getColumnIndex("title"));
-                                    itemArea = String.valueOf(cursor.getInt(cursor.getColumnIndex("area")))+ " km² ";
-                                    String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
-                                    int resid = getResources().getIdentifier("map"+itemTitle1, "drawable", getPackageName());
-                                    itemRes = getDrawable(resid);
-                                    sendString = itemTitle;
-                                    onClickPopIcon(glsv_content);
-                                }
-                                if (spTitle.getSelectedItem() == "Continent Globe"){
-                                    itemTitle = cursor.getString(cursor.getColumnIndex("title"));
-                                    itemArea = String.valueOf(cursor.getInt(cursor.getColumnIndex("area")))+ " km²";
-                                    itemPopulation = String.valueOf(cursor.getInt(cursor.getColumnIndex("population")));
-                                    String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
-                                    int resid = getResources().getIdentifier("label"+itemTitle1, "drawable", getPackageName());
-                                    itemRes = getDrawable(resid);
-                                    sendString = itemTitle;
-                                    onClickPopIcon(glsv_content);
-                                }
-                                if (spTitle.getSelectedItem() == "Political Globe") {
-                                    name = cursor.getString(cursor.getColumnIndex("name"));
-                                    //display country code
-//                                    Toast.makeText(MainActivity.this,name,Toast.LENGTH_SHORT).show();
-                                    name = name.toLowerCase();
-                                    new Thread(){
-                                        @Override
-                                        public void run() {
-                                            try{
-                                                Bitmap result = get(name);
-                                                Message msg=Message.obtain();
-                                                msg.what=0x11;
-                                                msg.obj=result;
-                                                handler.sendMessage(msg);
-                                            }catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    }.start();
-                                    countryApi(name);
-                                }
-                                cursor.moveToNext();
+                        if (spTitle.getSelectedItem() == "Physical Globe"||spTitle.getSelectedItem() == "Continent Globe"){
+                            if (spTitle.getSelectedItem() == "Physical Globe"){
+                                sql = getResources().getString(R.string.physicalsqlsearch,r,g,b);
                             }
-                        }else {
-                            Toast.makeText(MainActivity.this,"No matching data could be found",Toast.LENGTH_SHORT).show();
+                            if (spTitle.getSelectedItem() == "Continent Globe"){
+                                sql = getResources().getString(R.string.continentsqlsearch,r,g,b);
+                            }
+
+                            Cursor cursor = db.rawQuery(sql, null);
+                            if (cursor.getCount()!=0){
+                                cursor.moveToFirst();//转移到结果的第一行
+                                while (!cursor.isAfterLast()) {
+                                    id = cursor.getInt(cursor.getColumnIndex("id"));
+                                    if (spTitle.getSelectedItem() == "Physical Globe"){
+                                        itemTitle = cursor.getString(cursor.getColumnIndex("title"));
+                                        itemArea = String.valueOf(cursor.getInt(cursor.getColumnIndex("area")));
+                                        itemArea = addComma(itemArea,3);
+                                        itemArea = itemArea + " km² ";
+                                        String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
+                                        int resid = getResources().getIdentifier("map"+itemTitle1, "drawable", getPackageName());
+                                        itemRes = getDrawable(resid);
+                                        sendString = itemTitle;
+                                        onClickPopIcon(glsv_content);
+                                    }
+                                    if (spTitle.getSelectedItem() == "Continent Globe"){
+                                        itemTitle = cursor.getString(cursor.getColumnIndex("title"));
+                                        itemArea = String.valueOf(cursor.getInt(cursor.getColumnIndex("area")));
+                                        itemArea = addComma(itemArea,3);
+                                        itemArea = itemArea + " km²";
+                                        itemPopulation = String.valueOf(cursor.getInt(cursor.getColumnIndex("population")));
+                                        itemPopulation = addComma(itemPopulation,3);
+                                        String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
+                                        int resid = getResources().getIdentifier("label"+itemTitle1, "drawable", getPackageName());
+                                        itemRes = getDrawable(resid);
+                                        sendString = itemTitle;
+                                        onClickPopIcon(glsv_content);
+                                    }
+                                    cursor.moveToNext();
+                                }
+                            }
+                            else if(cursor.getCount()==0&&r!=0&&g!=0&&b!=0){
+                                itemTitle = "World";
+                                itemArea = "510000000";
+                                itemArea = addComma(itemArea,3);
+                                itemArea = itemArea + " km²";
+                                itemPopulation = "7700000000";
+                                itemPopulation = addComma(itemPopulation,3);
+
+                                String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
+                                int resid = getResources().getIdentifier("map"+itemTitle1, "drawable", getPackageName());
+                                itemRes = getDrawable(resid);
+                                sendString = itemTitle;
+                                onClickPopIcon(glsv_content);
+                            }
                         }
+
+                        else if (spTitle.getSelectedItem() == "Political Globe") {
+//                            sql = getResources().getString(R.string.politicalsqlsearch,r,g,b);
+                            getCountryCode(lat,lon);
+                        }
+
                     }catch (Exception e){
                         Toast.makeText(MainActivity.this,"API error, please check API availability",Toast.LENGTH_SHORT).show();
                     }
@@ -494,11 +463,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        if (count % 2 == 0) {
-                            isMove = true;
-                        } else {
-                            isMove = false;
-                        }
+                        isMove = count % 2 == 0;
                     }
                 }, 2000);
                 mode = 0;
@@ -537,33 +502,102 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         }
     };
 
+    private void getCountryCode(float latitude, float longitude){
+        GoogleGetCountryCode.GetCountryCodeRes getCountryCodeRes = new GoogleGetCountryCode.GetCountryCodeRes();
+        getCountryCodeRes.execute("https://maps.googleapis.com/maps/api/geocode/json?latlng="+latitude+","+longitude+"&key="+API_KEY+"&result_type=country");
+        getCountryCodeRes.setOnAsyncResponse(new GoogleGetCountryCode.AsyncResponse(){
+            @Override
+            public void onDataReceivedSuccess(String string) {
+                name = string.toLowerCase();
+                new Thread(){
+                    @Override
+                    public void run() {
+                        try{
+                            Bitmap result = get(name);
+                            Message msg=Message.obtain();
+                            msg.what=0x11;
+                            msg.obj=result;
+                            handler.sendMessage(msg);
+                        }catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }.start();
+                countryApi(name);
+            }
+            @Override
+            public void onDataReceivedFailed() {
+                itemTitle = "United Nations";
+                itemCapital = "New York";
+                itemArea = "Null";
+                name = "uno";
+                itemPopulation = "61000";
+                itemPopulation = addComma(itemPopulation,3);
+                itemRegion = "Null";
+                itemCurrencyRes = "Null";
+                itemLanguageRes = "enfrruzhares";
+                itemLanguageRes = addComma(itemLanguageRes,2);
+                String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
+                int resid = getResources().getIdentifier("map"+itemTitle1, "drawable", getPackageName());
+                itemRes = getDrawable(resid);
+                sendString = itemTitle;
+                onClickPopIcon(glsv_content);
+//                Toast.makeText(MainActivity.this,"Longitude and latitude received failed! Please check them or API!",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     //countryapi
     private void countryApi(final String name){
-        CountryApi.GetCountryApiRes getCountryRes = new CountryApi.GetCountryApiRes();
+        CountryApi.GetCountryApiRes getCountryRes = new CountryApi.GetCountryApiRes(MainActivity.this);
         getCountryRes.execute("https://restcountries-v1.p.rapidapi.com/alpha/" + name);
         getCountryRes.setOnAsyncResponse(new CountryApi.AsyncResponse(){
             @Override
             public void onDataReceivedSuccess(String string) {
                 String result = string;
-//                Toast.makeText(MainActivity.this,result,Toast.LENGTH_SHORT).show();
-                String [] arr = result.split("-");
+                String [] arr = result.split("@");
 
                 sendCode = name;
                 sendString = arr[0];
                 itemTitle = arr[0];
                 itemCapital = arr[1];
-                itemArea = arr[3]+ " km²";
+                itemArea = arr[3];
+                itemArea = addComma(itemArea,3);
+                itemArea = itemArea + " km²";
                 itemPopulation = arr[2];
+                itemPopulation = addComma(itemPopulation,3);
                 itemTime = arr[4];
+                itemRegion = arr[5]+","+arr[6];
+                itemCurrencyRes = arr[7];
+                itemCurrencyRes = addComma(itemCurrencyRes,3);
+                itemLanguageRes = arr[8];
+                itemLanguageRes = addComma(itemLanguageRes,2);
 
                 onClickPopIcon(glsv_content);
             }
 
             @Override
             public void onDataReceivedFailed() {
-                Toast.makeText(MainActivity.this,"data received failed!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this,"Country data received failed, please check longitude and latitude or API!",Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private String addComma(String input, int interval){
+        input = new StringBuilder(input).reverse().toString();
+        String str2 = "";
+        for(int i = 0; i < input.length(); i++){
+            if(i*interval+interval>input.length()) {
+                str2 += input.substring(i*interval, input.length());
+                break;
+            }
+            str2 += input.substring(i*interval, i*interval+interval)+",";
+        }
+        if(str2.toString().endsWith(",")){
+            str2 = str2.substring(0, str2.length()-1);
+        }
+        input = new StringBuilder(str2).reverse().toString();
+        return input;
     }
 
     //计算欧式距离
@@ -585,16 +619,16 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
         switch (position){
             case 0:
-                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe7);
+                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe1);
                 break;
             case 1:
-                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe6);
+                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe2);
                 break;
             case 2:
-                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe9);
+                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe3);
                 break;
             case 3:
-                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe3);
+                mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.globe4);
                 break;
         }
     }
@@ -623,7 +657,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 convertView = inflater.inflate(android.R.layout.simple_spinner_item, parent, false);
             }
 
-            TextView tv = (TextView) convertView.findViewById(android.R.id.text1);
+            TextView tv = convertView.findViewById(android.R.id.text1);
             tv.setText(items[position]);
             tv.setTextColor(getResources().getColor(R.color.colorPrimary));
             tv.setTextSize(30);
@@ -638,7 +672,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                         android.R.layout.simple_spinner_item, parent, false);
             }
 
-            TextView tv = (TextView) convertView.findViewById(android.R.id.text1);
+            TextView tv = convertView.findViewById(android.R.id.text1);
             tv.setText(items[position]);
             tv.setTextColor(getResources().getColor(R.color.colorPrimary));
             tv.setTextSize(30);
@@ -650,8 +684,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         count = 1;
         isMove = false;
         btnRotate.setImageDrawable(getDrawable(R.drawable.restart));
-        final Toast toast = Toast.makeText(MainActivity.this, "Automatic rotation: Close", Toast.LENGTH_SHORT);
-        toast.show();
 
         LabelMenu labelMenu = new LabelMenu(this);
         labelMenu.setTriangleIndicatorViewColor(Color.WHITE);
@@ -688,21 +720,24 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         List<MenuItem> list = new ArrayList<>();
         list.add(new MenuItem(itemRes,1, itemTitle));
         if(spTitle.getSelectedItem() == "Physical Globe"){
-            list.add(new MenuItem(getDrawable(R.drawable.area),3, "Area: "+itemArea));
-            list.add(new MenuItem(getDrawable(R.drawable.info),7, "More Info"));
+            list.add(new MenuItem(getDrawable(R.drawable.iconarea),3, "Area: "+itemArea));
+            list.add(new MenuItem(getDrawable(R.drawable.iconinfo),7, "More Info"));
         }
         if(spTitle.getSelectedItem() == "Continent Globe"){
-            list.add(new MenuItem(getDrawable(R.drawable.area),3, "Area: "+itemArea));
-            list.add(new MenuItem(getDrawable(R.drawable.population),4, "Population: "+itemPopulation));
-            list.add(new MenuItem(getDrawable(R.drawable.info),7, "More Info"));
+            list.add(new MenuItem(getDrawable(R.drawable.iconarea),3, "Area: "+itemArea));
+            list.add(new MenuItem(getDrawable(R.drawable.iconpopulation),4, "Population: "+itemPopulation));
+            list.add(new MenuItem(getDrawable(R.drawable.iconinfo),7, "More Info"));
         }
         if(spTitle.getSelectedItem() == "Political Globe"){
-            list.add(new MenuItem(getDrawable(R.drawable.capital),2, "Capital: "+itemCapital));
-            list.add(new MenuItem(getDrawable(R.drawable.area),3, "Area: "+itemArea));
-            list.add(new MenuItem(getDrawable(R.drawable.population),4, "Population: "+itemPopulation));
-            list.add(new MenuItem(getDrawable(R.drawable.timezone),5, "Time Zone: "+itemTime));
-            list.add(new MenuItem(getDrawable(R.drawable.music),6, "National Anthem"));
-            list.add(new MenuItem(getDrawable(R.drawable.info),7, "More Info"));
+            list.add(new MenuItem(getDrawable(R.drawable.iconcapital),2, "Capital: "+itemCapital));
+            list.add(new MenuItem(getDrawable(R.drawable.iconarea),3, "Area: "+itemArea));
+            list.add(new MenuItem(getDrawable(R.drawable.iconpopulation),4, "Population: "+itemPopulation));
+//            list.add(new MenuItem(getDrawable(R.drawable.timezone),5, "Time Zone: "+itemTime));
+            list.add(new MenuItem(getDrawable(R.drawable.iconregion),8, "Region: "+itemRegion));
+            list.add(new MenuItem(getDrawable(R.drawable.iconcurrency),10, "Currency: "+itemCurrencyRes));
+            list.add(new MenuItem(getDrawable(R.drawable.iconlanguage),11, "Language: "+itemLanguageRes));
+            list.add(new MenuItem(getDrawable(R.drawable.iconmusic),6, "National Anthem"));
+            list.add(new MenuItem(getDrawable(R.drawable.iconinfo),7, "More Info"));
         }
         return list;
     }

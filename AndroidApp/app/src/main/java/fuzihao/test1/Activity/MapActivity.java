@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -62,8 +63,7 @@ public class MapActivity extends AppCompatActivity{
     private long startTime = 0;
     private long endTime = 0;
 
-    String[] goToOtherMap = new String[]{"World","Asia","Europe","Africa","North America","South America","Oceania","Antarctica"};
-    List<String> goToOtherMapList;
+    List<String> goToOtherMapList = new ArrayList<>();
 
     float screenHeight;
     float screenWidth;
@@ -80,7 +80,14 @@ public class MapActivity extends AppCompatActivity{
         selectString = intent.getStringExtra("country");
         selectglobe = intent.getStringExtra("globe");
 
-        goToOtherMapList = Arrays.asList(goToOtherMap);
+        goToOtherMapList.add("World");
+        goToOtherMapList.add("Asia");
+        goToOtherMapList.add("Europe");
+        goToOtherMapList.add("Africa");
+        goToOtherMapList.add("North America");
+        goToOtherMapList.add("South America");
+        goToOtherMapList.add("Oceania");
+        goToOtherMapList.add("Antarctica");
 
         initView();
 
@@ -118,6 +125,7 @@ public class MapActivity extends AppCompatActivity{
 //                int height = Math.round(mapHeight*mapScale);
 //                int width = Math.round(mapWidth*mapScale);
                 Matrix matrix = new Matrix();
+
                 matrix.postScale(mapScale, mapScale);
                 Bitmap resizeBitmap = Bitmap.createBitmap(bitmap, 0, 0, mapWidth, mapHeight, matrix, true);
                 imgMap.setImageBitmap(resizeBitmap);
@@ -245,11 +253,20 @@ public class MapActivity extends AppCompatActivity{
                     break;
                 case MotionEvent.ACTION_MOVE:
                     if (mode == ZOOM) {
+                        float[] values = new float[9];
                         float newDist = distance(motionEvent);
                         if (newDist > 10f){
                             zoom = newDist / oldDist;
                             currentMatrix.set(matrix);
                             currentMatrix.postScale(zoom,zoom,midPoint.x,midPoint.y);
+                        }
+
+                        currentMatrix.getValues(values);
+                        if(values[0]<=0.5f){
+                            currentMatrix.postScale((0.5f)/values[0],(0.5f)/values[4],midPoint.x,midPoint.y);
+                        }
+                        else if(values[4]>=3.0f){
+                            currentMatrix.postScale((3.0f)/values[0],(3.0f)/values[4],midPoint.x,midPoint.y);
                         }
                     }else if (mode == DRAG){
                         float dx = motionEvent.getX() - startPoint.x;
@@ -294,26 +311,14 @@ public class MapActivity extends AppCompatActivity{
                     PointF p1 = getLeftPointF(currentMatrix);
                     PointF p2 = getRightPointF(currentMatrix);
 
-                    if(p1.x>imgMap.getWidth()/2){
-                        //左边界复位
-                        if(p1.x>0 && p1.x<=imgMap.getWidth()/2){
-                            currentMatrix.postTranslate(-p1.x,0);
-                        }
+                    //左边界复位
+                    if(p1.x>0){
+                        currentMatrix.postTranslate(-p1.x,0);
+                    }
 
-                        //右边界复位
-                        if(p2.x<imgMap.getWidth() && p2.x>=imgMap.getWidth()/2){
-                            currentMatrix.postTranslate(imgMap.getWidth()-p2.x,0);
-                        }
-                    }else{
-                        //左边界复位
-                        if(p1.x>0 && p1.x<=imgMap.getWidth()){
-                            currentMatrix.postTranslate(-p1.x,0);
-                        }
-
-                        //右边界复位
-                        if(p2.x<imgMap.getWidth() && p2.x>=imgMap.getWidth()){
-                            currentMatrix.postTranslate(imgMap.getWidth()-p2.x,0);
-                        }
+                    //右边界复位
+                    if(p2.x<imgMap.getWidth()){
+                        currentMatrix.postTranslate(imgMap.getWidth()-p2.x,0);
                     }
 
                     //上下边界复位
@@ -325,27 +330,28 @@ public class MapActivity extends AppCompatActivity{
                         //下边界复位
                         if(p2.y<imgMap.getHeight()){
                             currentMatrix.postTranslate(0,imgMap.getHeight()-p2.y);
-                        } }
+                        }
+                    }
                     else {
                         float row = (imgMap.getHeight()-(p2.y-p1.y))/2;
                         currentMatrix.postTranslate(0,row-p1.y);
                     }
 
                     if(goToOtherMapList.contains(txtIntroduction.getText().toString())){
-                        int positon = Arrays.binarySearch(goToOtherMap, txtIntroduction.getText().toString());
+                        int positon = goToOtherMapList.indexOf(txtIntroduction.getText().toString());
 
                         //拉过一半时操作前往上一张图像
                         if(p1.x>imgMap.getWidth()/2){
                             if(positon==0){
                                 intent = new Intent(MapActivity.this,MapActivity.class);
-                                intent.putExtra("country",goToOtherMap[7]);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.putExtra("country",goToOtherMapList.get(7));
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP| Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
                             }
                             if(positon>0&&positon<=7){
                                 intent = new Intent(MapActivity.this,MapActivity.class);
-                                intent.putExtra("country",goToOtherMap[positon-1]);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.putExtra("country",goToOtherMapList.get(positon-1));
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP| Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
                             }
                         }
@@ -354,14 +360,14 @@ public class MapActivity extends AppCompatActivity{
                         if(p2.x<imgMap.getWidth()/2){
                             if(positon==7){
                                 intent = new Intent(MapActivity.this,MapActivity.class);
-                                intent.putExtra("country",goToOtherMap[0]);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.putExtra("country",goToOtherMapList.get(0));
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP| Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
                             }
                             if(positon<7){
                                 intent = new Intent(MapActivity.this,MapActivity.class);
-                                intent.putExtra("country",goToOtherMap[positon+1]);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK| Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.putExtra("country",goToOtherMapList.get(positon+1));
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP| Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
                             }
                         }

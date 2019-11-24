@@ -7,10 +7,12 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import static fuzihao.test1.Activity.VRActivity.vrSphere;
+import static fuzihao.test1.Model.VrSphere.radius;
 
 public class VrSphereRender implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+        radius = 2f;
         vrSphere.create();
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glEnable(GLES20.GL_CULL_FACE);

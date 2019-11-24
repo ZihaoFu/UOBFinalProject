@@ -18,7 +18,8 @@
         android:supportsRtl="true"
         android:theme="@style/myTheme"
         tools:ignore="GoogleAppIndexingWarning">
-
+        <activity android:name=".Activity.PhotoViewer"
+            android:theme="@style/myTheme" />
         <activity
             android:name=".Activity.PhotoWallActivity"
             android:theme="@style/myTheme" />

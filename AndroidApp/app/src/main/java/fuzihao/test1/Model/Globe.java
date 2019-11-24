@@ -2,6 +2,7 @@ package fuzihao.test1.Model;
 
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -16,7 +17,7 @@ public class Globe {
 
     private int[] textures = new int[1];//Get a texture ID.
 
-    private ArrayList<FloatBuffer> mVertices = new ArrayList<FloatBuffer>();
+    public static ArrayList<FloatBuffer> mVertices = new ArrayList<FloatBuffer>();
     private ArrayList<FloatBuffer> mTextureCoords = new ArrayList<FloatBuffer>();
 
     // 计算球面顶点坐标 Calculate globe vertex coordinates
@@ -59,6 +60,14 @@ public class Globe {
                 texCoords[4*j+2] = j/(float)divide;
                 texCoords[4*j+3] = (i + 1) / (float)divide;
             }
+//            for(int k = 0; k <=divide; k++) {
+//                Log.e("verticesX1",String.valueOf(vertices[6*k+0]));
+//                Log.e("verticesY1",String.valueOf(vertices[6*k+1]));
+//                Log.e("verticesZ1",String.valueOf(vertices[6*k+2]));
+//                Log.e("verticesX2",String.valueOf(vertices[6*k+3]));
+//                Log.e("verticesY2",String.valueOf(vertices[6*k+4]));
+//                Log.e("verticesZ2",String.valueOf(vertices[6*k+5]));
+//            }
 
             // 为存放形状的坐标，初始化顶点字节缓冲 Initialize vertex byte buffer for storing shape coordinates
             ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * Float.SIZE);

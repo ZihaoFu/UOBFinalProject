@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.List;
 
 import fuzihao.test1.Adapter.ItemDecoration;
 import fuzihao.test1.Adapter.RecyclerAdapter;
@@ -53,6 +54,10 @@ public class PhotoWallActivity extends AppCompatActivity {
     int vrWidth;
     float vrScale;
 
+    public String [] arr;
+
+    List<String> vrCountry = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +75,12 @@ public class PhotoWallActivity extends AppCompatActivity {
 
         selectID = 1;
         photoApi();
+
+        vrCountry.add("France");
+        vrCountry.add("United Kingdom");
+        vrCountry.add("Russia");
+        vrCountry.add("United States");
+        vrCountry.add("China");
     }
 
     @Override
@@ -110,7 +121,7 @@ public class PhotoWallActivity extends AppCompatActivity {
         }
     }
 
-    private void initView(){
+    private void initView(final String [] photoInfo){
         layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
 //        layoutManager = new StaggeredGridLayoutManager(2, OrientationHelper.VERTICAL);
         recyclerView = (RecyclerView) findViewById(R.id.photoWall);
@@ -122,13 +133,24 @@ public class PhotoWallActivity extends AppCompatActivity {
         ((RecyclerAdapter) adapter).setOnItemClickListener(new RecyclerAdapter.OnItemClickListener(){
             @Override
             public void onItemClick(View view, int position) {
-                if(position == 0){
-                    Intent intent = new Intent(PhotoWallActivity.this, VRActivity.class);
-                    intent.putExtra("vr",selectName);
+                if (vrCountry.contains(selectName)){
+                    if(position == 0){
+                        Intent intent = new Intent(PhotoWallActivity.this, VRActivity.class);
+                        intent.putExtra("vr",selectName);
+                        startActivity(intent);
+                    }
+                    else {
+//                        Toast.makeText(PhotoWallActivity.this,"click " + position + " item", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(PhotoWallActivity.this, PhotoViewer.class);
+                        intent.putExtra("photoRef",position);
+                        intent.putExtra("photoid",selectid);
+                        startActivity(intent);
+                    }
+                }else{
+                    Intent intent = new Intent(PhotoWallActivity.this, PhotoViewer.class);
+                    intent.putExtra("photoRef",position+1);
+                    intent.putExtra("photoid",selectid);
                     startActivity(intent);
-                }
-                else {
-                    Toast.makeText(PhotoWallActivity.this,"click " + position + " item", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -143,8 +165,6 @@ public class PhotoWallActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    public String [] arr;
-
     private void photoApi(){
         GoogleMapPhotoApi.GetGoogleMapPhotoApiRes getCountryRes = new GoogleMapPhotoApi.GetGoogleMapPhotoApiRes();
         getCountryRes.execute("https://maps.googleapis.com/maps/api/place/details/json?placeid=" + selectid + "&key=" + apiKey + "&fields=photos");
@@ -152,9 +172,9 @@ public class PhotoWallActivity extends AppCompatActivity {
             @Override
             public void onDataReceivedSuccess(String string) {
                 arr = string.split(",");
+
                 GoogleGetPhoto.GetPhotoApiRes getPhoto = new GoogleGetPhoto.GetPhotoApiRes(PhotoWallActivity.this);
                 String [] urls = new String[10];
-//                urls[0] = "https://maps.googleapis.com/maps/api/place/photo?key="+apiKey+"&photoreference="+arr[3]+"&maxheight="+arr[1]+"&maxwidth="+arr[2];
                 int count = 0;
                 for (int i = 1; i<=28; i = i + 3){
                     float scale = screenWidth/ Float.valueOf(arr[i+1]);
@@ -172,14 +192,16 @@ public class PhotoWallActivity extends AppCompatActivity {
                         for(Bitmap res : result){
                             data.add(new BitmapDrawable(res));
                         }
-                        initView();
+                        initView(arr);
                     }
 
                     @Override
                     public void onDataReceivedFailed() {
-                        Toast.makeText(PhotoWallActivity.this,"data received failed!",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PhotoWallActivity.this,"Photo received failed!",Toast.LENGTH_SHORT).show();
                     }
                 });
+
+
             }
 
             @Override
