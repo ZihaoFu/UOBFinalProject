@@ -1,25 +1,19 @@
 package fuzihao.test1.Model;
 
-import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
-import android.widget.Toast;
 
-import java.nio.IntBuffer;
 import java.util.Calendar;
-import java.util.Vector;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import fuzihao.test1.Activity.MainActivity;
-import fuzihao.test1.Geometry;
+//import fuzihao.test1.Geometry;
 
-import static android.content.ContentValues.TAG;
 import static fuzihao.test1.Activity.MainActivity.angle;
 import static fuzihao.test1.Activity.MainActivity.angle2;
 import static fuzihao.test1.Activity.MainActivity.globe;
@@ -28,7 +22,6 @@ import static fuzihao.test1.Activity.MainActivity.isMove;
 import static fuzihao.test1.Activity.MainActivity.mBitmap;
 import static fuzihao.test1.Activity.MainActivity.move;
 import static fuzihao.test1.Activity.MainActivity.origin;
-import static fuzihao.test1.Model.Globe.mVertices;
 
 //Renderer class
 public class GlobeRender implements GLSurfaceView.Renderer {
@@ -163,14 +156,11 @@ public class GlobeRender implements GLSurfaceView.Renderer {
         if (angle2 >= 60) {
             angle2 = 60.0f;
             gl.glRotatef(60.0f, 1, 0, 0);
-//            Matrix.rotateM(mVMatrix,0,60.0f, 1, 0, 0);
         } else if (angle2 <= -60) {
             angle2 = -60.0f;
             gl.glRotatef(-60.0f, 1, 0, 0);
-//            Matrix.rotateM(mVMatrix,0,-60.0f, 1, 0, 0);
         } else {
             gl.glRotatef(angle2, 1, 0, 0);
-//            Matrix.rotateM(mVMatrix,0,angle2, 1, 0, 0);
         }
         if(angle >=360){
             angle = 0;
@@ -179,20 +169,16 @@ public class GlobeRender implements GLSurfaceView.Renderer {
             angle = 0;
         }
         gl.glRotatef(angle, 0, 1, 0);
-//        Matrix.rotateM(mVMatrix,0,angle, 0, 1, 0);
 
         // 设置缩放动画 Set zoom ratio(gestures)
         if (origin >= 5.0f) {
             origin = 5.0f;
             gl.glScalef(5f, 5f, 5f);
-//            Matrix.scaleM(mVMatrix,0,5f, 5f, 5f);
         } else if (origin <= 0.5f) {
             origin = 0.5f;
             gl.glScalef(0.5f, 0.5f, 0.5f);
-//            Matrix.scaleM(mVMatrix,0,0.5f, 0.5f, 0.5f);
         } else {
             gl.glScalef(origin, origin, origin);
-//            Matrix.scaleM(mVMatrix,0,origin, origin, origin);
         }
         globe.drawGlobe(gl,mBitmap);//Call the globe class to draw a globe
         if (isMove == true) {
@@ -200,9 +186,6 @@ public class GlobeRender implements GLSurfaceView.Renderer {
         } else {
             angle = angle;
         }
-
-//        Matrix.multiplyMM(mMVPMatrix,0,mProjMatrix,0,mVMatrix,0);
-//        Matrix.invertM(invertedViewProjectionMatrix, 0, mMVPMatrix, 0);
     }
 
     public static void handleTouchDown(float normalizedX, float normalizedY) {
@@ -210,9 +193,9 @@ public class GlobeRender implements GLSurfaceView.Renderer {
         final float[] farPointNdc = { normalizedX, normalizedY, 1, 1 };
         float[] NearPos4 = new float[4];
         float[] FarPos4 = new float[4];
-        Geometry.Vector NearPos = new Geometry.Vector(0,0,0);
-        Geometry.Vector FarPos = new Geometry.Vector(0,0,0);
-        Geometry.Vector newPos = new Geometry.Vector(0,0,0);
+        RayPickingHelper.Vector NearPos = new RayPickingHelper.Vector(0,0,0);
+        RayPickingHelper.Vector FarPos = new RayPickingHelper.Vector(0,0,0);
+        RayPickingHelper.Vector newPos = new RayPickingHelper.Vector(0,0,0);
 
         Matrix.setIdentityM(mVMatrix,0);
         Matrix.setIdentityM(mProjMatrix,0);
@@ -237,7 +220,7 @@ public class GlobeRender implements GLSurfaceView.Renderer {
         FarPos.y = FarPos4[1]/FarPos4[3];
         FarPos.z = FarPos4[2]/FarPos4[3];
 
-        Geometry.Vector dir = new Geometry.Vector(FarPos.x - NearPos.x,FarPos.y-NearPos.y,FarPos.z-NearPos.z);
+        RayPickingHelper.Vector dir = new RayPickingHelper.Vector(FarPos.x - NearPos.x,FarPos.y-NearPos.y,FarPos.z-NearPos.z);
         float dirLength = (float) Math.sqrt((dir.x*dir.x)+(dir.y*dir.y)+dir.z*dir.z);
         dir.x = dir.x/dirLength;
         dir.y = dir.y/dirLength;
@@ -249,8 +232,9 @@ public class GlobeRender implements GLSurfaceView.Renderer {
 
         double d = Math.pow(b,2) - 4 * a * c;
         double t = (-b + Math.sqrt(d))/(2*a);
+        double t2 = (-b - Math.sqrt(d))/(2*a);
 
-        Log.e("delta","delta="+t);
+        Log.e("delta","delta="+t+","+t2);
 
         //get x, y and z coordinates of the touch point
         newPos.x = (float) (NearPos.x + dir.x * t);
@@ -259,6 +243,7 @@ public class GlobeRender implements GLSurfaceView.Renderer {
 //        newPos.z = NearPos.z;
         Log.e("touch point","x="+newPos.x+"y="+newPos.y+"z="+newPos.z);
 
+        //calculate latitude
         float dis = (float) Math.sqrt(newPos.x*newPos.x+newPos.z*newPos.z);//The distance from the coordinate of the touch point on the x-z axis plane to the origin
         dis = dis/3;//get cos(angle)
 
@@ -268,6 +253,7 @@ public class GlobeRender implements GLSurfaceView.Renderer {
             latitude = (float) -(Math.acos(dis)*180/Math.PI);//use arccosine function to get angle, and angle is the latitude of touch point
         }
 
+        //calculate longitude
         if (newPos.x<0&&newPos.z<0){
             longitude = (float) ((Math.atan(newPos.z/newPos.x))*180/Math.PI);
         }else if(newPos.x>0&&newPos.z<0) {

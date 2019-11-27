@@ -1,92 +1,93 @@
 package fuzihao.test1.Adapter;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.LinearLayoutManager;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextPaint;
 import android.view.View;
 
 import fuzihao.test1.R;
 
 public class ItemDecoration extends RecyclerView.ItemDecoration {
-    private static final int[] ATTRS = new int[]{
-            android.R.attr.listDivider
-    };
+    private Paint dividerPaint;
+    private TextPaint textPaint;
+    private Paint.FontMetrics fontMetrics;
+    private int topGap;
+    private int dataLength;
 
-    public static final int HORIZONTAL_LIST = LinearLayoutManager.HORIZONTAL;
-    public static final int VERTICAL_LIST = LinearLayoutManager.VERTICAL;
+    public ItemDecoration(Context context,int length) {
+        dataLength = length;
+        dividerPaint = new Paint();
+        dividerPaint.setColor(context.getResources().getColor(R.color.colorPrimary));
 
-    private Drawable divider;
-
-    private int mOrientation;
-
-    public ItemDecoration(Context context, int orientation) {
-        // 获取默认主题的属性
-        final TypedArray a = context.obtainStyledAttributes(ATTRS);
-        divider = a.getDrawable(0);
-        a.recycle();
-        setOrientation(orientation);
-    }
-
-    @Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        // 绘制间隔
-        if (mOrientation == VERTICAL_LIST) {
-            drawVertical(c, parent);
-        } else {
-            drawHorizontal(c, parent);
-        }
+        textPaint = new TextPaint();
+        textPaint.setTypeface(Typeface.DEFAULT_BOLD);
+        textPaint.setAntiAlias(true);
+        textPaint.setTextSize(70);
+        textPaint.setColor(Color.BLACK);
+        textPaint.getFontMetrics(fontMetrics);
+        textPaint.setTextAlign(Paint.Align.LEFT);
+        fontMetrics = new Paint.FontMetrics();
+        topGap = context.getResources().getDimensionPixelSize(R.dimen.section_top);
     }
 
     @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        if (mOrientation == VERTICAL_LIST) {
-            outRect.set(0, 0, 0, divider.getIntrinsicHeight());
-        } else {
-            outRect.set(0, 0, divider.getIntrinsicWidth(), 0);
+        super.getItemOffsets(outRect, view, parent, state);
+        int pos = parent.getChildAdapterPosition(view);
+        if(pos==0||pos == dataLength-10){
+            outRect.top = topGap;
+        }else {
+            outRect.top = 0;
         }
     }
 
-    private void setOrientation(int orientation) {
-        if (orientation != HORIZONTAL_LIST && orientation != VERTICAL_LIST) {
-            throw new IllegalArgumentException("invalid orientation");
-        }
-        mOrientation = orientation;
-    }
+    @Override
+    public void onDrawOver(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
+        super.onDrawOver(canvas, parent, state);
+        int itemCount = state.getItemCount();
+        int childCount = parent.getChildCount();
+        int left = parent.getPaddingLeft();
+        int right = parent.getWidth() - parent.getPaddingRight();
+        String groupID = "";
+        String preGroupId = "";
+        String textLine = "";
 
-    private void drawVertical(Canvas c, RecyclerView parent) {
-        final int left = parent.getPaddingLeft();
-        final int right = parent.getWidth() - parent.getPaddingRight();
-        final int childCount = parent.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            final View child = parent.getChildAt(i);
-            final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                    .getLayoutParams();
-            final int top = child.getBottom() + params.bottomMargin +
-                    Math.round(ViewCompat.getTranslationY(child));
-            final int bottom = top + divider.getIntrinsicHeight();
-            divider.setBounds(left, top, right, bottom);
-            divider.draw(c);
-        }
-    }
+        for (int i = 0; i < childCount - 1; i++) {
+            View view = parent.getChildAt(i);
+            int position = parent.getChildAdapterPosition(view);
 
-    private void drawHorizontal(Canvas c, RecyclerView parent) {
-        final int top = parent.getPaddingTop();
-        final int bottom = parent.getHeight() - parent.getPaddingBottom();
-        final int childCount = parent.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            final View child = parent.getChildAt(i);
-            final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                    .getLayoutParams();
-            final int left = child.getRight() + params.rightMargin +
-                    Math.round(ViewCompat.getTranslationX(child));
-            final int right = left + divider.getIntrinsicHeight();
-            divider.setBounds(left, top, right, bottom);
-            divider.draw(c);
+            preGroupId = groupID;
+            if (position == 0 && dataLength!=10){
+                groupID = "Panoramic Photo";
+                textLine = "Panoramic Photo";
+            }
+            else {
+                groupID = "Normal Photo";
+                textLine = "Normal Photo";
+            }
+            if (groupID.equals(preGroupId)) continue;
+
+            int viewBottom = view.getBottom();
+            float textY = Math.max(topGap, view.getTop());
+            if(position+1<itemCount){
+                String nextGroupID;
+                if (position+1<dataLength-10){
+                    nextGroupID = "Panoramic Photo";
+                }else{
+                    nextGroupID = "Normal Photo";
+                }
+                if (!nextGroupID.equals(groupID) && viewBottom < textY){
+                    textY = viewBottom;
+                }
+            }
+
+            canvas.drawRect(left, textY - topGap, right, textY, dividerPaint);
+            canvas.drawText(textLine, left, textY, textPaint);
         }
     }
 }

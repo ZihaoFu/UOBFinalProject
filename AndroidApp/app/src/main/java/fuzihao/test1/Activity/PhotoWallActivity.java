@@ -1,34 +1,24 @@
 package fuzihao.test1.Activity;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import fuzihao.test1.Adapter.ItemDecoration;
 import fuzihao.test1.Adapter.RecyclerAdapter;
-import fuzihao.test1.Adapter.StaggeredAdapter;
 import fuzihao.test1.Api.GoogleGetPhoto;
 import fuzihao.test1.Api.GoogleMapPhotoApi;
 import fuzihao.test1.R;
@@ -123,7 +113,6 @@ public class PhotoWallActivity extends AppCompatActivity {
 
     private void initView(final String [] photoInfo){
         layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
-//        layoutManager = new StaggeredGridLayoutManager(2, OrientationHelper.VERTICAL);
         recyclerView = (RecyclerView) findViewById(R.id.photoWall);
 
         layoutManager.setAutoMeasureEnabled(true);
@@ -141,13 +130,13 @@ public class PhotoWallActivity extends AppCompatActivity {
                     }
                     else {
 //                        Toast.makeText(PhotoWallActivity.this,"click " + position + " item", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(PhotoWallActivity.this, PhotoViewer.class);
+                        Intent intent = new Intent(PhotoWallActivity.this, PhotoViewerActivity.class);
                         intent.putExtra("photoRef",position);
                         intent.putExtra("photoid",selectid);
                         startActivity(intent);
                     }
                 }else{
-                    Intent intent = new Intent(PhotoWallActivity.this, PhotoViewer.class);
+                    Intent intent = new Intent(PhotoWallActivity.this, PhotoViewerActivity.class);
                     intent.putExtra("photoRef",position+1);
                     intent.putExtra("photoid",selectid);
                     startActivity(intent);
@@ -160,7 +149,7 @@ public class PhotoWallActivity extends AppCompatActivity {
             }
         });
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addItemDecoration(new ItemDecoration(this,LinearLayoutManager.VERTICAL));
+        recyclerView.addItemDecoration(new ItemDecoration(this, data.size()));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
     }

@@ -8,4 +8,6 @@
     <dimen name="drop_pop_menu_item_horizontal_margin">10dp</dimen>
     <dimen name="drop_pop_menu_icon_text_margin">10dp</dimen>
     <dimen name="drop_pop_menu_icon_width">22dp</dimen>
+
+    <dimen name="section_top">25dp</dimen>
 </resources>

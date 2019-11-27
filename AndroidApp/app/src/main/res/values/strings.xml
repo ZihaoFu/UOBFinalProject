@@ -23,9 +23,9 @@
     <string name="SAMap">South America Map</string>
     <string name="oceaniaMap">oceania Map</string>
     <string name="antarcticaMap">antarctica Map</string>
-    <string name="author">Author: Fu Zihao</string>
-    <string name="version">Version: 3.0</string>
-    <string name="modifyTime">Modify Time: 18/11/2019</string>
+    <string name="author">Developer: Fu Zihao</string>
+    <string name="version">Globe Master: 3.0</string>
+    <string name="modifyTime">Modify Time: 25/11/2019</string>
     <string name="photo">photo</string>
 
     <string name="physicalsqlsearch">SELECT * FROM physical WHERE red = %1$d AND green = %2$d AND blue = %3$d</string>

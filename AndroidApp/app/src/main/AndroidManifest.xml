@@ -18,7 +18,19 @@
         android:supportsRtl="true"
         android:theme="@style/myTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".Activity.PhotoViewer"
+        <activity android:name=".Activity.HelpActivity"
+            android:theme="@style/Transparent" />
+        <activity
+            android:name=".Activity.StartActivity"
+            android:theme="@style/myTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Activity.PhotoViewerActivity"
             android:theme="@style/myTheme" />
         <activity
             android:name=".Activity.PhotoWallActivity"
@@ -33,15 +45,9 @@
             android:name=".Activity.SelectActivity"
             android:theme="@style/Transparent" />
         <activity
-            android:name=".Activity.Setting"
+            android:name=".Activity.SettingActivity"
             android:theme="@style/Transparent" />
-        <activity android:name=".Activity.MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".Activity.MainActivity"></activity>
 
         <service android:name=".Music.FloatingMusicPlayerService" />
     </application>

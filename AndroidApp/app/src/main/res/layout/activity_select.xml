@@ -6,36 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".Activity.SelectActivity">
 
-    <ImageView
-        android:id="@+id/imageView6"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:src="@drawable/logo6"
-        app:layout_constraintStart_toEndOf="@+id/imageView5"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
-
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="36dp"
-        android:src="@drawable/logo3"
-        app:layout_constraintStart_toEndOf="@+id/imageView2"
-        app:layout_constraintTop_toBottomOf="@+id/txtData" />
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="36dp"
-        android:src="@drawable/logo2"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/txtData" />
-
     <Button
         android:id="@+id/btnGeo"
         android:layout_width="200dp"
@@ -208,7 +178,7 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView5" />
+        app:layout_constraintTop_toBottomOf="@+id/imgLogo6" />
 
     <TextView
         android:id="@+id/txtVersion"
@@ -239,9 +209,9 @@
         app:layout_constraintTop_toBottomOf="@+id/txtVersion" />
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:id="@+id/imgLogo1"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="36dp"
         android:src="@drawable/logo1"
@@ -249,32 +219,72 @@
         app:layout_constraintTop_toBottomOf="@+id/txtData" />
 
     <ImageView
-        android:id="@+id/imageView4"
+        android:id="@+id/imgLogo2"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="36dp"
+        android:src="@drawable/logo2"
+        app:layout_constraintStart_toEndOf="@+id/imgLogo1"
+        app:layout_constraintTop_toBottomOf="@+id/txtData" />
+
+    <ImageView
+        android:id="@+id/imgLogo3"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="36dp"
+        android:src="@drawable/logo3"
+        app:layout_constraintStart_toEndOf="@+id/imgLogo2"
+        app:layout_constraintTop_toBottomOf="@+id/txtData" />
+
+    <ImageView
+        android:id="@+id/imgLogo4"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="36dp"
+        android:src="@drawable/logo4"
+        app:layout_constraintStart_toEndOf="@+id/imgLogo3"
+        app:layout_constraintTop_toBottomOf="@+id/txtData" />
+
+    <ImageView
+        android:id="@+id/imgLogo5"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
-        android:src="@drawable/logo4" />
+        app:layout_constraintTop_toBottomOf="@+id/imgLogo1"
+        android:src="@drawable/logo5" />
 
     <ImageView
-        android:id="@+id/imageView7"
+        android:id="@+id/imgLogo6"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/logo6"
+        app:layout_constraintStart_toEndOf="@+id/imgLogo5"
+        app:layout_constraintTop_toBottomOf="@+id/imgLogo2" />
+
+    <ImageView
+        android:id="@+id/imgLogo7"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:src="@drawable/logo7"
-        app:layout_constraintStart_toEndOf="@+id/imageView6"
-        app:layout_constraintTop_toBottomOf="@+id/imageView3" />
+        app:layout_constraintStart_toEndOf="@+id/imgLogo6"
+        app:layout_constraintTop_toBottomOf="@+id/imgLogo2" />
 
     <ImageView
-        android:id="@+id/imageView5"
+        android:id="@+id/imgLogo8"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:src="@drawable/logo5"
-        app:layout_constraintStart_toEndOf="@+id/imageView4"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+        android:src="@drawable/logo8"
+        app:layout_constraintStart_toEndOf="@+id/imgLogo7"
+        app:layout_constraintTop_toBottomOf="@+id/imgLogo3" />
 </android.support.constraint.ConstraintLayout>

@@ -1,5 +1,7 @@
 package fuzihao.test1.Api;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 
 import org.json.JSONException;
@@ -14,11 +16,28 @@ public class WikiApi{
         void onDataReceivedFailed();
     }
 
-    public static class GetApiRes extends AsyncTask<String, Void, String> {
+    public static class GetApiRes extends AsyncTask<String, Integer, String> {
         AsyncResponse asyncResponse;
+        private Context mContext;
+        ProgressDialog pd;
+
         public void setOnAsyncResponse(AsyncResponse asyncResponse)
         {
             this.asyncResponse = asyncResponse;
+        }
+
+        public GetApiRes(Context context){
+            mContext = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            pd = new ProgressDialog(mContext);
+            pd.setMax(1);
+            pd.setTitle("Tips");
+            pd.setMessage("Loading the Wikipedia content, please wait...");
+            pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            pd.show();
         }
 
         @Override
@@ -26,26 +45,26 @@ public class WikiApi{
             return GET(urls[0]);
         }
 
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            pd.setIndeterminate(false);
+            pd.setProgress(values[0]);
+            super.onProgressUpdate(values);
+        }
+
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
-//        Toast.makeText(getBaseContext(), "Received!", Toast.LENGTH_SHORT).show();
-//            String UN="";
-//            String PW="";
-//            String user="";
+            pd.dismiss();
             String wikiText="";
             try {
                 JSONObject json = new JSONObject(result); // convert String to JSONObject
-                //JSONArray articles = json.getJSONArray("array"); // get articles array
                 JSONObject query = json.getJSONObject("query");
                 JSONObject pages = query.getJSONObject("pages");
-                //user=pages.toString();
 
                 String[] str_array = pages.toString().substring(0,20).split(":");
                 String string1 = str_array[0];
                 String pageid=string1.substring(2,string1.length()-1);
-//                user=string1+"\n"+pageid;
-
 
                 JSONObject page = pages.getJSONObject(pageid);
 
@@ -60,20 +79,14 @@ public class WikiApi{
                 if(!wikiText.isEmpty())
                 {
                     asyncResponse.onDataReceivedSuccess(wikiText.trim());
-//                return wikiText.trim();
-//                tvResponse.setText(wikiText.trim());
-
                 }
                 else{
                     asyncResponse.onDataReceivedFailed();
                 }
-//                tvResponse.setText("No Result Found");
             }
             catch(JSONException e)
             {
                 asyncResponse.onDataReceivedFailed();
-//            tvResponse.setText(e.toString());
-//            Toast.makeText(getBaseContext(), "JSONException!", Toast.LENGTH_SHORT).show();
             }
         }
     }

@@ -1,16 +1,11 @@
 package fuzihao.test1.Activity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -18,9 +13,9 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -31,7 +26,6 @@ import android.widget.Toast;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import fuzihao.test1.Api.GoogleMapPhotoApi;
@@ -46,8 +40,6 @@ public class MapActivity extends AppCompatActivity{
     int select;
     String selectString;
     String selectglobe;
-    String selectCode;
-    Drawable itemRes;
 
     private ImageView imgMap;
     private TextView txtIntroduction;
@@ -65,8 +57,8 @@ public class MapActivity extends AppCompatActivity{
 
     List<String> goToOtherMapList = new ArrayList<>();
 
-    float screenHeight;
-    float screenWidth;
+    float imageHeight;
+    float imageWidth;
     int mapHeight;
     int mapWidth;
     float mapScale;
@@ -93,45 +85,43 @@ public class MapActivity extends AppCompatActivity{
 
         introduction = selectString;
         txtIntroduction.setText(introduction);
-        String introduction1 = introduction.toLowerCase().replaceAll(" ","");
+        final String introduction1;
+        if (introduction.equals("United States")){
+            introduction1 = "the-united-states-of-america";
+        }else if(introduction.equals("Republic of Macedonia")){
+            introduction1 = "macedonia";
+        }else if(introduction.equals("Republic of Ireland")){
+            introduction1 = "ireland";
+        }else{
+            introduction1 = introduction.toLowerCase().replaceAll(" ","-");
+        }
         String introduction2 = introduction.toLowerCase().replaceAll(" ","_");
-        try {
-            int resid = getResources().getIdentifier("map"+introduction1, "drawable", getPackageName());
-            if (resid == 0){
-                selectCode = intent.getStringExtra("code");
-                new Thread(){
-                    @Override
-                    public void run() {
-                        try{
-                            Bitmap result = get(selectCode);
-                            Message msg=Message.obtain();
-                            msg.what=0x11;
-                            msg.obj=result;
-                            handler.sendMessage(msg);
-                        }catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }.start();
-                imgMap.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            }else{
-                WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
-                screenHeight = wm.getDefaultDisplay().getHeight();
-                screenWidth = wm.getDefaultDisplay().getWidth();
-                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), resid);
-                mapHeight = bitmap.getHeight();
-                mapWidth = bitmap.getWidth();
-                mapScale = screenWidth/ (float) mapWidth;
-//                int height = Math.round(mapHeight*mapScale);
-//                int width = Math.round(mapWidth*mapScale);
-                Matrix matrix = new Matrix();
+        String introduction3 = introduction.toLowerCase().replaceAll(" ","");
 
-                matrix.postScale(mapScale, mapScale);
-                Bitmap resizeBitmap = Bitmap.createBitmap(bitmap, 0, 0, mapWidth, mapHeight, matrix, true);
-                imgMap.setImageBitmap(resizeBitmap);
-            }
+        final int resid = getResources().getIdentifier("map"+introduction3, "drawable", getPackageName());
+        try {
+            new Thread(){
+                @Override
+                public void run() {
+                    try{
+                        Bitmap result;
+                        if (resid == 0){
+                            result = get(introduction1);
+                        }else{
+                            result = BitmapFactory.decodeResource(getResources(), resid);
+                        }
+                        Message msg=Message.obtain();
+                        msg.what=0x11;
+                        msg.obj=result;
+                        handler.sendMessage(msg);
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
         }catch (Exception e){
             Toast.makeText(MapActivity.this,"Get image resource failed",Toast.LENGTH_SHORT).show();
+            Log.e("err",String.valueOf(e));
         }
 
         wikiApi();
@@ -144,10 +134,10 @@ public class MapActivity extends AppCompatActivity{
 
     private Bitmap get(String name) throws Exception {
         //定义一个url输入流，将图片地址放入
-        URL url = new URL("https://www.countryflags.io/"+name+"/flat/64.png");
+        URL url = new URL("https://geology.com/world/"+name+"-map.gif");
         //定义一个 InputStream 获取url的输入流（或者直接将url.openStream放入decodeStream解析成bitmap）
         InputStream is=url.openStream();
-        Bitmap bitmap = BitmapFactory.decodeStream(is);
+        Bitmap bitmap = (Bitmap) BitmapFactory.decodeStream(is);
         is.close();
         return bitmap;
     }
@@ -157,8 +147,21 @@ public class MapActivity extends AppCompatActivity{
         public void handleMessage(Message msg) {
             switch (msg.what){
                 case 0x11:
-                    itemRes = new BitmapDrawable((Bitmap) msg.obj);
-                    imgMap.setImageDrawable(itemRes);
+                    imageHeight = imgMap.getHeight();
+                    imageWidth = imgMap.getWidth();
+                    Bitmap result = (Bitmap) msg.obj;
+                    mapHeight = result.getHeight();
+                    mapWidth = result.getWidth();
+                    mapScale = imageWidth/ (float) mapWidth;
+                    Matrix matrix = new Matrix();
+                    matrix.postScale(mapScale, mapScale);
+                    Matrix imgM = imgMap.getImageMatrix();
+                    if(mapHeight*mapScale<imageHeight){
+                        imgM.postTranslate(0,(imageHeight-(mapHeight*mapScale))/2);
+                    }
+                    result = Bitmap.createBitmap(result, 0, 0, mapWidth, mapHeight, matrix, true);
+                    imgMap.setImageBitmap(result);
+                    imgMap.setImageMatrix(imgM);
                     break;
             }
         }
@@ -176,7 +179,10 @@ public class MapActivity extends AppCompatActivity{
 
     //wikiapi
     private void wikiApi(){
-        WikiApi.GetApiRes getRes = new WikiApi.GetApiRes();
+        if (introduction.equals("Republic of Macedonia")){
+            introduction = "North Macedonia";
+        }
+        WikiApi.GetApiRes getRes = new WikiApi.GetApiRes(MapActivity.this);
         getRes.execute("https://en.wikipedia.org/w/api.php?" +
                 "format=json" +
                 "&action=query" +
@@ -206,13 +212,14 @@ public class MapActivity extends AppCompatActivity{
         btnSetting = (ImageButton) findViewById(R.id.btnSetting2);
         swShow = (Switch) findViewById(R.id.swTime);
         swShow.setChecked(true);
+        swShow.setVisibility(View.GONE);
 
         txtSimple.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         btnSetting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                intent=new Intent(MapActivity.this, Setting.class);
+                intent=new Intent(MapActivity.this, SettingActivity.class);
                 startActivity(intent);
                 btnSetting.setVisibility(View.INVISIBLE);
             }

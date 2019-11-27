@@ -29,13 +29,14 @@ public class SelectActivity extends Activity implements View.OnClickListener {
     private TextView txtAuthor;
     private TextView txtVersion;
     private TextView txtModifyTime;
-    private ImageView imageView1;
-    private ImageView imageView2;
-    private ImageView imageView3;
-    private ImageView imageView4;
-    private ImageView imageView5;
-    private ImageView imageView6;
-    private ImageView imageView7;
+    private ImageView imgLogo1;
+    private ImageView imgLogo2;
+    private ImageView imgLogo3;
+    private ImageView imgLogo4;
+    private ImageView imgLogo5;
+    private ImageView imgLogo6;
+    private ImageView imgLogo7;
+    private ImageView imgLogo8;
 
     private Intent intent;
 
@@ -60,13 +61,14 @@ public class SelectActivity extends Activity implements View.OnClickListener {
             txtAuthor.setVisibility(View.INVISIBLE);
             txtVersion.setVisibility(View.INVISIBLE);
             txtModifyTime.setVisibility(View.INVISIBLE);
-            imageView1.setVisibility(View.INVISIBLE);
-            imageView2.setVisibility(View.INVISIBLE);
-            imageView3.setVisibility(View.INVISIBLE);
-            imageView4.setVisibility(View.INVISIBLE);
-            imageView5.setVisibility(View.INVISIBLE);
-            imageView6.setVisibility(View.INVISIBLE);
-            imageView7.setVisibility(View.INVISIBLE);
+            imgLogo1.setVisibility(View.INVISIBLE);
+            imgLogo2.setVisibility(View.INVISIBLE);
+            imgLogo3.setVisibility(View.INVISIBLE);
+            imgLogo4.setVisibility(View.INVISIBLE);
+            imgLogo5.setVisibility(View.INVISIBLE);
+            imgLogo6.setVisibility(View.INVISIBLE);
+            imgLogo7.setVisibility(View.INVISIBLE);
+            imgLogo8.setVisibility(View.INVISIBLE);
         }else if(requestCode==1){
             btnGeo.setVisibility(View.INVISIBLE);
             btnContinent.setVisibility(View.INVISIBLE);
@@ -75,13 +77,14 @@ public class SelectActivity extends Activity implements View.OnClickListener {
             txtAuthor.setVisibility(View.INVISIBLE);
             txtVersion.setVisibility(View.INVISIBLE);
             txtModifyTime.setVisibility(View.INVISIBLE);
-            imageView1.setVisibility(View.INVISIBLE);
-            imageView2.setVisibility(View.INVISIBLE);
-            imageView3.setVisibility(View.INVISIBLE);
-            imageView4.setVisibility(View.INVISIBLE);
-            imageView5.setVisibility(View.INVISIBLE);
-            imageView6.setVisibility(View.INVISIBLE);
-            imageView7.setVisibility(View.INVISIBLE);
+            imgLogo1.setVisibility(View.INVISIBLE);
+            imgLogo2.setVisibility(View.INVISIBLE);
+            imgLogo3.setVisibility(View.INVISIBLE);
+            imgLogo4.setVisibility(View.INVISIBLE);
+            imgLogo5.setVisibility(View.INVISIBLE);
+            imgLogo6.setVisibility(View.INVISIBLE);
+            imgLogo7.setVisibility(View.INVISIBLE);
+            imgLogo8.setVisibility(View.INVISIBLE);
         }else if(requestCode==2){
             btnGeo.setVisibility(View.INVISIBLE);
             btnContinent.setVisibility(View.INVISIBLE);
@@ -115,13 +118,14 @@ public class SelectActivity extends Activity implements View.OnClickListener {
         txtAuthor = (TextView) findViewById(R.id.txtAuthor);
         txtVersion = (TextView) findViewById(R.id.txtVersion);
         txtModifyTime = (TextView) findViewById(R.id.txtModifyTime);
-        imageView1 = (ImageView) findViewById(R.id.imageView);
-        imageView2 = (ImageView) findViewById(R.id.imageView2);
-        imageView3 = (ImageView) findViewById(R.id.imageView3);
-        imageView4 = (ImageView) findViewById(R.id.imageView4);
-        imageView5 = (ImageView) findViewById(R.id.imageView5);
-        imageView6 = (ImageView) findViewById(R.id.imageView6);
-        imageView7 = (ImageView) findViewById(R.id.imageView7);
+        imgLogo1 = (ImageView) findViewById(R.id.imgLogo1);
+        imgLogo2 = (ImageView) findViewById(R.id.imgLogo2);
+        imgLogo3 = (ImageView) findViewById(R.id.imgLogo3);
+        imgLogo4 = (ImageView) findViewById(R.id.imgLogo4);
+        imgLogo5 = (ImageView) findViewById(R.id.imgLogo5);
+        imgLogo6 = (ImageView) findViewById(R.id.imgLogo6);
+        imgLogo7 = (ImageView) findViewById(R.id.imgLogo7);
+        imgLogo8 = (ImageView) findViewById(R.id.imgLogo8);
 
         btnGeo.setOnClickListener(this);
         btnContinent.setOnClickListener(this);
@@ -135,13 +139,14 @@ public class SelectActivity extends Activity implements View.OnClickListener {
         btnSA.setOnClickListener(this);
         btnOceania.setOnClickListener(this);
         btnAntarctica.setOnClickListener(this);
-        imageView1.setOnClickListener(this);
-        imageView2.setOnClickListener(this);
-        imageView3.setOnClickListener(this);
-        imageView4.setOnClickListener(this);
-        imageView5.setOnClickListener(this);
-        imageView6.setOnClickListener(this);
-        imageView7.setOnClickListener(this);
+        imgLogo1.setOnClickListener(this);
+        imgLogo2.setOnClickListener(this);
+        imgLogo3.setOnClickListener(this);
+        imgLogo4.setOnClickListener(this);
+        imgLogo5.setOnClickListener(this);
+        imgLogo6.setOnClickListener(this);
+        imgLogo7.setOnClickListener(this);
+        imgLogo8.setOnClickListener(this);
     }
 
     @Override
@@ -211,38 +216,43 @@ public class SelectActivity extends Activity implements View.OnClickListener {
                 intent.putExtra("country","Antarctica");
                 startActivity(intent);
                 break;
-            case R.id.imageView:
-                uri = Uri.parse("http://ontheworldmap.com/");    //设置跳转的网站
-                intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-                break;
-            case R.id.imageView2:
+            case R.id.imgLogo1:
                 uri = Uri.parse("https://iconmonstr.com/");    //设置跳转的网站
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
-            case R.id.imageView3:
-                uri = Uri.parse("https://www.mediawiki.org/wiki/API:Main_page");    //设置跳转的网站
+            case R.id.imgLogo2:
+                uri = Uri.parse("http://ontheworldmap.com/");    //设置跳转的网站
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
-            case R.id.imageView4:
-                uri = Uri.parse("https://rapidapi.com/");    //设置跳转的网站
+            case R.id.imgLogo3:
+                uri = Uri.parse("https://geology.com/world/");    //设置跳转的网站
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
-            case R.id.imageView5:
+            case R.id.imgLogo4:
                 uri = Uri.parse("https://www.countryflags.io/");    //设置跳转的网站
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
-            case R.id.imageView6:
+            case R.id.imgLogo5:
                 uri = Uri.parse("http://www.nationalanthems.info/");    //设置跳转的网站
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
-            case R.id.imageView7:
+            case R.id.imgLogo6:
+                uri = Uri.parse("https://rapidapi.com/");    //设置跳转的网站
+                intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                break;
+            case R.id.imgLogo7:
                 uri = Uri.parse("https://developers.google.com/places/web-service/intro");    //设置跳转的网站
+                intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                break;
+            case R.id.imgLogo8:
+                uri = Uri.parse("https://www.mediawiki.org/wiki/API:Main_page");    //设置跳转的网站
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;

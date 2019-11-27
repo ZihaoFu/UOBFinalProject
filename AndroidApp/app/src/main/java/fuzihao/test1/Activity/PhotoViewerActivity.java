@@ -20,7 +20,7 @@ import fuzihao.test1.Api.GoogleGetPhoto;
 import fuzihao.test1.Api.GoogleMapPhotoApi;
 import fuzihao.test1.R;
 
-public class PhotoViewer extends AppCompatActivity {
+public class PhotoViewerActivity extends AppCompatActivity {
     private ImageView imgPhoto;
     private Intent intent;
 
@@ -50,7 +50,7 @@ public class PhotoViewer extends AppCompatActivity {
             public void onDataReceivedSuccess(String string) {
                 arr = string.split(",");
 
-                GoogleGetPhoto.GetPhotoApiRes getPhoto = new GoogleGetPhoto.GetPhotoApiRes(PhotoViewer.this);
+                GoogleGetPhoto.GetPhotoApiRes getPhoto = new GoogleGetPhoto.GetPhotoApiRes(PhotoViewerActivity.this);
                 String url = "https://maps.googleapis.com/maps/api/place/photo?key=" + apiKey + "&photoreference=" + arr[3* photoRef] + "&maxheight=" + arr[3* photoRef - 2] + "&maxwidth=" + arr[3* photoRef - 1];
                 getPhoto.execute(url);
 
@@ -63,20 +63,24 @@ public class PhotoViewer extends AppCompatActivity {
                         float mapScale = screenWidth/ (float) photoWidth;
                         Matrix matrix = new Matrix();
                         matrix.postScale(mapScale, mapScale);
-
                         Bitmap resizeBitmap = Bitmap.createBitmap(bitmap, 0, 0, photoWidth, photoHeight, matrix, true);
+                        Matrix imgM = imgPhoto.getImageMatrix();
+                        if(photoHeight*mapScale<imgPhoto.getHeight()){
+                            imgM.postTranslate(0,(imgPhoto.getHeight()-(photoHeight*mapScale))/2);
+                        }
                         imgPhoto.setImageBitmap(resizeBitmap);
+                        imgPhoto.setImageMatrix(imgM);
                     }
 
                     @Override
                     public void onDataReceivedFailed() {
-                        Toast.makeText(PhotoViewer.this, "Photo received failed!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PhotoViewerActivity.this, "Photo received failed!", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
             @Override
             public void onDataReceivedFailed() {
-                Toast.makeText(PhotoViewer.this,"data received failed!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(PhotoViewerActivity.this,"data received failed!",Toast.LENGTH_SHORT).show();
             }
         });
         imgPhoto.setOnTouchListener(new Move());
@@ -162,11 +166,11 @@ public class PhotoViewer extends AppCompatActivity {
                     //拉过一半时操作前往上一张图像
                     if(p1.x>imgPhoto.getWidth()/2){
                         if(photoRef==0){
-                            intent = new Intent(PhotoViewer.this,PhotoViewer.class);
+                            intent = new Intent(PhotoViewerActivity.this, PhotoViewerActivity.class);
                             intent.putExtra("photoRef",9);
                         }
                         if(photoRef>0&&photoRef<=9){
-                            intent = new Intent(PhotoViewer.this,PhotoViewer.class);
+                            intent = new Intent(PhotoViewerActivity.this, PhotoViewerActivity.class);
                             intent.putExtra("photoRef",photoRef-1);
                         }
                         intent.putExtra("photoid",photoid);
@@ -177,11 +181,11 @@ public class PhotoViewer extends AppCompatActivity {
                     //拉过一半时操作前往下一张图像
                     if(p2.x<imgPhoto.getWidth()/2){
                         if(photoRef==9){
-                            intent = new Intent(PhotoViewer.this,PhotoViewer.class);
+                            intent = new Intent(PhotoViewerActivity.this, PhotoViewerActivity.class);
                             intent.putExtra("photoRef",0);
                         }
                         if(photoRef<9){
-                            intent = new Intent(PhotoViewer.this,PhotoViewer.class);
+                            intent = new Intent(PhotoViewerActivity.this, PhotoViewerActivity.class);
                             intent.putExtra("photoRef",photoRef+1);
                         }
                         intent.putExtra("photoid",photoid);

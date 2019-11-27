@@ -46,7 +46,7 @@ import java.util.TimerTask;
 
 import fuzihao.test1.Api.CountryApi;
 import fuzihao.test1.Api.GoogleGetCountryCode;
-import fuzihao.test1.Label.GBData;
+import fuzihao.test1.Label.GetColorFromScreen;
 import fuzihao.test1.Model.Globe;
 import fuzihao.test1.Label.LabelMenu;
 import fuzihao.test1.Label.MenuItem;
@@ -141,6 +141,12 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     float lat;
     float lon;
 
+    int color=0;
+    int a=0;
+    int r=0;
+    int g=0;
+    int b=0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -230,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                 dm.widthPixels, dm.heightPixels, dm.densityDpi,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
                 imageReader.getSurface(), null, null);
-        GBData.reader = imageReader;
+        GetColorFromScreen.reader = imageReader;
     }
 
     @Override
@@ -273,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         btnSetting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                intent = new Intent(MainActivity.this, Setting.class);
+                intent = new Intent(MainActivity.this, SettingActivity.class);
                 startActivity(intent);
                 btnSetting.setVisibility(View.INVISIBLE);
 //                txtTitle.setVisibility(View.INVISIBLE);
@@ -381,11 +387,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                     lat = latitude;
                     lon = longitude;
 
-                    int color = GBData.getColor(Math.round(x), Math.round(y));
-                    int a = Color.alpha(color);
-                    int r = Color.red(color);
-                    int g = Color.green(color);
-                    int b = Color.blue(color);
+                    color = GetColorFromScreen.getColor(Math.round(x), Math.round(y));
+                    a = Color.alpha(color);
+                    r = Color.red(color);
+                    g = Color.green(color);
+                    b = Color.blue(color);
 
                     //display color data
                     Toast toast = Toast.makeText(MainActivity.this,String.valueOf(r)+String.valueOf(g)+String.valueOf(b),Toast.LENGTH_SHORT);
@@ -503,7 +509,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     };
 
     private void getCountryCode(float latitude, float longitude){
-        GoogleGetCountryCode.GetCountryCodeRes getCountryCodeRes = new GoogleGetCountryCode.GetCountryCodeRes();
+        count = 1;
+        isMove = false;
+        btnRotate.setImageDrawable(getDrawable(R.drawable.restart));
+
+        GoogleGetCountryCode.GetCountryCodeRes getCountryCodeRes = new GoogleGetCountryCode.GetCountryCodeRes(MainActivity.this);
         getCountryCodeRes.execute("https://maps.googleapis.com/maps/api/geocode/json?latlng="+latitude+","+longitude+"&key="+API_KEY+"&result_type=country");
         getCountryCodeRes.setOnAsyncResponse(new GoogleGetCountryCode.AsyncResponse(){
             @Override
@@ -527,21 +537,23 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             }
             @Override
             public void onDataReceivedFailed() {
-                itemTitle = "United Nations";
-                itemCapital = "New York";
-                itemArea = "Null";
-                name = "uno";
-                itemPopulation = "61000";
-                itemPopulation = addComma(itemPopulation,3);
-                itemRegion = "Null";
-                itemCurrencyRes = "Null";
-                itemLanguageRes = "enfrruzhares";
-                itemLanguageRes = addComma(itemLanguageRes,2);
-                String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
-                int resid = getResources().getIdentifier("map"+itemTitle1, "drawable", getPackageName());
-                itemRes = getDrawable(resid);
-                sendString = itemTitle;
-                onClickPopIcon(glsv_content);
+                if(r!=0&&g!=0&&b!=0){
+                    itemTitle = "United Nations";
+                    itemCapital = "New York";
+                    itemArea = "Null";
+                    name = "uno";
+                    itemPopulation = "61000";
+                    itemPopulation = addComma(itemPopulation,3);
+                    itemRegion = "Null";
+                    itemCurrencyRes = "Null";
+                    itemLanguageRes = "enfrruzhares";
+                    itemLanguageRes = addComma(itemLanguageRes,2);
+                    String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
+                    int resid = getResources().getIdentifier("map"+itemTitle1, "drawable", getPackageName());
+                    itemRes = getDrawable(resid);
+                    sendString = itemTitle;
+                    onClickPopIcon(glsv_content);
+                }
 //                Toast.makeText(MainActivity.this,"Longitude and latitude received failed! Please check them or API!",Toast.LENGTH_SHORT).show();
             }
         });

@@ -9,12 +9,11 @@ import android.widget.TextView;
 
 import fuzihao.test1.R;
 
-public class Setting extends Activity implements View.OnClickListener {
+public class SettingActivity extends Activity implements View.OnClickListener {
     private Intent intent;
 
     private Button btnGlobe;
     private Button btnMap;
-//    private Button btnDay;
     private Button btnHow;
     private Button btnInfo;
 
@@ -33,7 +32,6 @@ public class Setting extends Activity implements View.OnClickListener {
         super.onResume();
         btnGlobe.setVisibility(View.VISIBLE);
         btnMap.setVisibility(View.VISIBLE);
-//        btnDay.setVisibility(View.VISIBLE);
         btnHow.setVisibility(View.VISIBLE);
         btnInfo.setVisibility(View.VISIBLE);
         txtTitle.setVisibility(View.VISIBLE);
@@ -42,7 +40,6 @@ public class Setting extends Activity implements View.OnClickListener {
     private void initView(){
         btnGlobe=(Button)findViewById(R.id.btnGlobe);
         btnMap=(Button)findViewById(R.id.btnMap) ;
-//        btnDay=(Button)findViewById(R.id.btnDay);
         btnHow=(Button)findViewById(R.id.btnHow);
         btnInfo=(Button)findViewById(R.id.btnInfo);
         txtTitle=(TextView)findViewById(R.id.txtTitle1) ;
@@ -50,7 +47,6 @@ public class Setting extends Activity implements View.OnClickListener {
 
         btnGlobe.setOnClickListener(this);
         btnMap.setOnClickListener(this);
-//        btnDay.setOnClickListener(this);
         btnHow.setOnClickListener(this);
         btnInfo.setOnClickListener(this);
     }
@@ -58,26 +54,28 @@ public class Setting extends Activity implements View.OnClickListener {
     public void onClick(View v){
         switch (v.getId()){
             case R.id.btnGlobe:
-                intent = new Intent(Setting.this, SelectActivity.class);
+                intent = new Intent(SettingActivity.this, SelectActivity.class);
                 intent.putExtra("num",0);
                 startActivity(intent);
                 break;
             case R.id.btnMap:
-                intent = new Intent(Setting.this,SelectActivity.class);
+                intent = new Intent(SettingActivity.this,SelectActivity.class);
                 intent.putExtra("num",1);
                 startActivity(intent);
                 break;
             case R.id.btnHow:
+                intent = new Intent(SettingActivity.this,HelpActivity.class);
+                intent.putExtra("num",3);
+                startActivity(intent);
                 break;
             case R.id.btnInfo:
-                intent = new Intent(Setting.this,SelectActivity.class);
+                intent = new Intent(SettingActivity.this,SelectActivity.class);
                 intent.putExtra("num",2);
                 startActivity(intent);
                 break;
         }
         btnGlobe.setVisibility(View.INVISIBLE);
         btnMap.setVisibility(View.INVISIBLE);
-//        btnDay.setVisibility(View.INVISIBLE);
         btnHow.setVisibility(View.INVISIBLE);
         btnInfo.setVisibility(View.INVISIBLE);
         txtTitle.setVisibility(View.INVISIBLE);

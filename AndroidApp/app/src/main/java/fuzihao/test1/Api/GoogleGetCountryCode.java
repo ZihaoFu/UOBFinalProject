@@ -1,5 +1,6 @@
 package fuzihao.test1.Api;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -19,11 +20,27 @@ public class GoogleGetCountryCode {
         void onDataReceivedFailed();
     }
 
-    public static class GetCountryCodeRes extends AsyncTask<String, Void, String> {
+    public static class GetCountryCodeRes extends AsyncTask<String, Integer, String> {
         GoogleGetCountryCode.AsyncResponse asyncResponse;
+        private Context mContext;
+        ProgressDialog pd;
 
         public void setOnAsyncResponse(GoogleGetCountryCode.AsyncResponse asyncResponse) {
             this.asyncResponse = asyncResponse;
+        }
+
+        public GetCountryCodeRes(Context context){
+            mContext = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            pd = new ProgressDialog(mContext);
+            pd.setMax(1);
+            pd.setTitle("Tips");
+            pd.setMessage("Searching country code, please wait...");
+            pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            pd.show();
         }
 
         @Override
@@ -32,7 +49,15 @@ public class GoogleGetCountryCode {
         }
 
         @Override
+        protected void onProgressUpdate(Integer... values) {
+            pd.setIndeterminate(false);
+            pd.setProgress(values[0]);
+            super.onProgressUpdate(values);
+        }
+
+        @Override
         protected void onPostExecute(String result) {
+            pd.dismiss();
             String countryCode="";
             try {
                 JSONObject jsonObject = new JSONObject(result);

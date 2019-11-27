@@ -7,7 +7,7 @@ import android.util.Log;
 
 import java.nio.ByteBuffer;
 
-public class GBData {
+public class GetColorFromScreen {
         private static final String TAG = "GBData";
         public static ImageReader reader;
         private static Bitmap bitmap;
