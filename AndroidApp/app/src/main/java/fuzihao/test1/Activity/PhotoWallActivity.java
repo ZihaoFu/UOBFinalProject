@@ -129,7 +129,7 @@ public class PhotoWallActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                     else {
-//                        Toast.makeText(PhotoWallActivity.this,"click " + position + " item", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PhotoWallActivity.this,"click " + position + " item", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(PhotoWallActivity.this, PhotoViewerActivity.class);
                         intent.putExtra("photoRef",position);
                         intent.putExtra("photoid",selectid);

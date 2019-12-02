@@ -165,32 +165,34 @@ public class PhotoViewerActivity extends AppCompatActivity {
 
                     //拉过一半时操作前往上一张图像
                     if(p1.x>imgPhoto.getWidth()/2){
-                        if(photoRef==0){
+                        if(photoRef==1){
                             intent = new Intent(PhotoViewerActivity.this, PhotoViewerActivity.class);
-                            intent.putExtra("photoRef",9);
+                            intent.putExtra("photoRef",10);
                         }
-                        if(photoRef>0&&photoRef<=9){
+                        if(photoRef>1&&photoRef<=10){
                             intent = new Intent(PhotoViewerActivity.this, PhotoViewerActivity.class);
                             intent.putExtra("photoRef",photoRef-1);
                         }
                         intent.putExtra("photoid",photoid);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP| Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                     }
 
                     //拉过一半时操作前往下一张图像
                     if(p2.x<imgPhoto.getWidth()/2){
-                        if(photoRef==9){
+                        if(photoRef==10){
                             intent = new Intent(PhotoViewerActivity.this, PhotoViewerActivity.class);
-                            intent.putExtra("photoRef",0);
+                            intent.putExtra("photoRef",1);
                         }
-                        if(photoRef<9){
+                        if(photoRef<10){
                             intent = new Intent(PhotoViewerActivity.this, PhotoViewerActivity.class);
                             intent.putExtra("photoRef",photoRef+1);
                         }
                         intent.putExtra("photoid",photoid);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP| Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                     }
                     break;
                 case MotionEvent.ACTION_POINTER_UP:

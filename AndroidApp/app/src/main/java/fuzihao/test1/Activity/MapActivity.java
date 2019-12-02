@@ -51,6 +51,7 @@ public class MapActivity extends AppCompatActivity{
     private String link = "https://en.wikipedia.org/wiki/"; // Set a basic link
     private String html = "<a href="+link+">Link to Wikipedia</a>";
     private String introduction = "World";
+    String introduction4;
 
     private long startTime = 0;
     private long endTime = 0;
@@ -97,6 +98,7 @@ public class MapActivity extends AppCompatActivity{
         }
         String introduction2 = introduction.toLowerCase().replaceAll(" ","_");
         String introduction3 = introduction.toLowerCase().replaceAll(" ","");
+        introduction4 = introduction.replaceAll(" ","_");
 
         final int resid = getResources().getIdentifier("map"+introduction3, "drawable", getPackageName());
         try {
@@ -180,7 +182,7 @@ public class MapActivity extends AppCompatActivity{
     //wikiapi
     private void wikiApi(){
         if (introduction.equals("Republic of Macedonia")){
-            introduction = "North Macedonia";
+            introduction4 = "North_Macedonia";
         }
         WikiApi.GetApiRes getRes = new WikiApi.GetApiRes(MapActivity.this);
         getRes.execute("https://en.wikipedia.org/w/api.php?" +
@@ -189,7 +191,7 @@ public class MapActivity extends AppCompatActivity{
                 "&prop=extracts" +
 
                 "&explaintext=" +
-                "&titles="+introduction);
+                "&titles="+introduction4);
         getRes.setOnAsyncResponse(new WikiApi.AsyncResponse() {
             @Override
             public void onDataReceivedSuccess(String string) {

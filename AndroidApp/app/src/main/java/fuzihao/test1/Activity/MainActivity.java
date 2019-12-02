@@ -36,6 +36,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.FloatBuffer;
@@ -54,18 +58,14 @@ import fuzihao.test1.Model.GlobeRender;
 import fuzihao.test1.Music.FloatingMusicPlayerService;
 import fuzihao.test1.Music.Player;
 import fuzihao.test1.R;
-import fuzihao.test1.SqlDatabase.MySQLiteOpenHelper;
 
 import static fuzihao.test1.Model.GlobeRender.latitude;
 import static fuzihao.test1.Model.GlobeRender.longitude;
 import static fuzihao.test1.Music.FloatingMusicPlayerService.btnMusic;
 
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener, AdapterView.OnItemSelectedListener {
-    private GLSurfaceView glsv_content;
+    public static GLSurfaceView glsv_content;
     final String API_KEY = "AIzaSyBbmKXXOLKFsICWeJkFWtp4Z9Jy9RtljX4";
-    //使用OpenGL库创建一个材质(Texture)，首先是获取一个Texture Id。
-    //Use the OpenGL library to create a texture.
-    private int[] textures = new int[2];//Get a texture ID.
     public static float move = 0.1f;
     public static float angle = 0;//横向旋转角度 Lateral rotation angle
     public static float angle2 = 0;//竖向旋转角度 Vertical rotation angle
@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     public static Bitmap mBitmap;
 
     private ImageButton btnSetting;
-//    private TextView txtTitle;
     private Spinner spTitle;
     private ImageButton btnDay;
     int dayNight = 0;
@@ -130,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     int[] location = new int[2];
     int sendValue = 0;
 
-    private MySQLiteOpenHelper mySQLiteOpenHelper;
     private SQLiteDatabase db;
 
     String name;
@@ -253,7 +251,12 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     @Override
     public void onBackPressed() {
         if(System.currentTimeMillis() - firstPressTime < 2000){
-            FloatingMusicPlayerService.windowManager.removeView(btnMusic);
+            try{
+                FloatingMusicPlayerService.windowManager.removeView(btnMusic);
+                db.close();
+            }catch (Exception e){
+
+            }
             super.onBackPressed();
         }else {
             Toast.makeText(MainActivity.this,"Please press again to exit application",Toast.LENGTH_SHORT).show();
@@ -325,8 +328,39 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             }
         });
 
-        mySQLiteOpenHelper = new MySQLiteOpenHelper(MainActivity.this,"colorPosition.db");
-        db = mySQLiteOpenHelper.getWritableDatabase();
+        String DB_FILE_PATH = "/data/data/fuzihao.test1/databases/colorposition.db";
+        importDataBase();
+        db = SQLiteDatabase.openOrCreateDatabase(DB_FILE_PATH, null);
+
+//        mySQLiteOpenHelper = new MySQLiteOpenHelper(MainActivity.this,"colorPosition2.db");
+//        db = mySQLiteOpenHelper.getWritableDatabase();
+    }
+
+    public void importDataBase(){
+        String DB_PATH = "/data/data/fuzihao.test1/databases";
+        File dir = new File(DB_PATH);
+        if(!dir.exists()) {
+            dir.mkdir();
+        }
+
+        File file = new File(dir, "colorposition.db");
+        try {
+            if(!file.exists()) {
+                file.createNewFile();
+            }
+            //LOAD DATABASE
+            InputStream is = this.getApplicationContext().getResources().openRawResource(R.raw.colorposition);
+            FileOutputStream fos = new FileOutputStream(file);
+            byte[] buffere=new byte[is.available()];
+            is.read(buffere);
+            fos.write(buffere);
+            is.close();
+            fos.close();
+        }catch(FileNotFoundException e){
+            e.printStackTrace();
+        }catch(IOException e) {
+            e.printStackTrace();
+        }
     }
 
     //Touch action
@@ -412,30 +446,20 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                                 cursor.moveToFirst();//转移到结果的第一行
                                 while (!cursor.isAfterLast()) {
                                     id = cursor.getInt(cursor.getColumnIndex("id"));
-                                    if (spTitle.getSelectedItem() == "Physical Globe"){
-                                        itemTitle = cursor.getString(cursor.getColumnIndex("title"));
-                                        itemArea = String.valueOf(cursor.getInt(cursor.getColumnIndex("area")));
-                                        itemArea = addComma(itemArea,3);
-                                        itemArea = itemArea + " km² ";
-                                        String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
-                                        int resid = getResources().getIdentifier("map"+itemTitle1, "drawable", getPackageName());
-                                        itemRes = getDrawable(resid);
-                                        sendString = itemTitle;
-                                        onClickPopIcon(glsv_content);
-                                    }
+
                                     if (spTitle.getSelectedItem() == "Continent Globe"){
-                                        itemTitle = cursor.getString(cursor.getColumnIndex("title"));
-                                        itemArea = String.valueOf(cursor.getInt(cursor.getColumnIndex("area")));
-                                        itemArea = addComma(itemArea,3);
-                                        itemArea = itemArea + " km²";
                                         itemPopulation = String.valueOf(cursor.getInt(cursor.getColumnIndex("population")));
                                         itemPopulation = addComma(itemPopulation,3);
-                                        String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
-                                        int resid = getResources().getIdentifier("label"+itemTitle1, "drawable", getPackageName());
-                                        itemRes = getDrawable(resid);
-                                        sendString = itemTitle;
-                                        onClickPopIcon(glsv_content);
                                     }
+                                    itemTitle = cursor.getString(cursor.getColumnIndex("title"));
+                                    itemArea = String.valueOf(cursor.getInt(cursor.getColumnIndex("area")));
+                                    itemArea = addComma(itemArea,3);
+                                    itemArea = itemArea + " km² ";
+                                    String itemTitle1 = itemTitle.toLowerCase().replaceAll(" ","");
+                                    int resid = getResources().getIdentifier("map"+itemTitle1, "drawable", getPackageName());
+                                    itemRes = getDrawable(resid);
+                                    sendString = itemTitle;
+                                    onClickPopIcon(glsv_content);
                                     cursor.moveToNext();
                                 }
                             }
@@ -456,12 +480,11 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
                         }
 
                         else if (spTitle.getSelectedItem() == "Political Globe") {
-//                            sql = getResources().getString(R.string.politicalsqlsearch,r,g,b);
                             getCountryCode(lat,lon);
                         }
 
                     }catch (Exception e){
-                        Toast.makeText(MainActivity.this,"API error, please check API availability",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this,"API/Database error, please check API/Database availability",Toast.LENGTH_SHORT).show();
                     }
                 }
                 //抬起时地球仪继续旋转

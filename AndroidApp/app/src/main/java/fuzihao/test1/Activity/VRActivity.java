@@ -44,39 +44,48 @@ public class VRActivity extends AppCompatActivity implements SensorEventListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vr);
 
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
-        //判断是否存在rotation vector sensor
-        rotation = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        try{
+            sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
+            //判断是否存在rotation vector sensor
 
-        glSurfaceView = (GLSurfaceView) findViewById(R.id.gl_content);
-        glSurfaceView.setEGLContextClientVersion(2);
-        glSurfaceView.setRenderer(new VrSphereRender());
-        glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+            rotation = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
-        intent = getIntent();
-        select = intent.getStringExtra("vr");
-        //fr
-        if (select.equals("France")){
-            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.france360);
+            glSurfaceView = (GLSurfaceView) findViewById(R.id.gl_content);
+            glSurfaceView.setEGLContextClientVersion(2);
+            glSurfaceView.setRenderer(new VrSphereRender());
+            glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+
+            intent = getIntent();
+            select = intent.getStringExtra("vr");
+            //fr
+            if (select.equals("France")){
+                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.france360);
+            }
+            //uk
+            if(select.equals("United Kingdom")){
+                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama01);
+            }
+            //ru
+            if(select.equals("Russia")){
+                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama02);
+            }
+            //us
+            if(select.equals("United States")){
+                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama03);
+            }
+            //cn
+            if(select.equals("China")){
+                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama04);
+            }
+            vrSphere = new VrSphere(this.getApplicationContext(),bitmap);
+            if (sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) == null){
+                Toast.makeText(VRActivity.this,"Sensor cannot be detected",Toast.LENGTH_LONG).show();
+            }
+        }catch (Exception e){
+            Toast.makeText(VRActivity.this,"This function meet some problems, please try again!",Toast.LENGTH_LONG).show();
         }
-        //uk
-        if(select.equals("United Kingdom")){
-            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama01);
-        }
-        //ru
-        if(select.equals("Russia")){
-            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama02);
-        }
-        //us
-        if(select.equals("United States")){
-            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama03);
-        }
-        //cn
-        if(select.equals("China")){
-            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama04);
-        }
-        vrSphere = new VrSphere(this.getApplicationContext(),bitmap);
+
     }
 
     @Override

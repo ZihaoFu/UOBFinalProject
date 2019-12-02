@@ -17,6 +17,7 @@ import javax.microedition.khronos.opengles.GL10;
 import static fuzihao.test1.Activity.MainActivity.angle;
 import static fuzihao.test1.Activity.MainActivity.angle2;
 import static fuzihao.test1.Activity.MainActivity.globe;
+import static fuzihao.test1.Activity.MainActivity.glsv_content;
 import static fuzihao.test1.Activity.MainActivity.isDayNight;
 import static fuzihao.test1.Activity.MainActivity.isMove;
 import static fuzihao.test1.Activity.MainActivity.mBitmap;
@@ -25,7 +26,7 @@ import static fuzihao.test1.Activity.MainActivity.origin;
 
 //Renderer class
 public class GlobeRender implements GLSurfaceView.Renderer {
-    private int[] textures = new int[2];//Get a texture ID.
+    private int textures[] = new int[1];//Get a texture ID.
 
     private static float[] mVMatrix = new float[16];
     private static float[] mProjMatrix = new float[16];
@@ -65,13 +66,7 @@ public class GlobeRender implements GLSurfaceView.Renderer {
 
         // 告诉OpenGL去生成textures.textures中存放了创建的Texture ID
         // Function to generate texture
-
-        int[] fbos = new int[1];
-        GLES20.glGenFramebuffers(1, fbos,0);
-        int fboId = fbos[0];
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fboId);
-
-        gl.glGenTextures(2, textures, 0);
+        gl.glGenTextures(1, textures, 0);
         //通知OpenGL库使用这个Texture
         //Binding texture
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -89,6 +84,7 @@ public class GlobeRender implements GLSurfaceView.Renderer {
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
 //            //将Bitmap资源和Texture绑定起来
 //            //Bind bitmap resource and texture
+
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
     }
 
