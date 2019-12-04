@@ -23,13 +23,13 @@ public class SettingActivity extends Activity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
-        initView();
+        initView(); // Initialize all interface variables
     }
 
     @Override
     public void onResume() {
-
         super.onResume();
+        // Resume Visibility
         btnGlobe.setVisibility(View.VISIBLE);
         btnMap.setVisibility(View.VISIBLE);
         btnHow.setVisibility(View.VISIBLE);
@@ -37,6 +37,7 @@ public class SettingActivity extends Activity implements View.OnClickListener {
         txtTitle.setVisibility(View.VISIBLE);
     }
 
+    // Initialize all interface variables
     private void initView(){
         btnGlobe=(Button)findViewById(R.id.btnGlobe);
         btnMap=(Button)findViewById(R.id.btnMap) ;
@@ -44,13 +45,13 @@ public class SettingActivity extends Activity implements View.OnClickListener {
         btnInfo=(Button)findViewById(R.id.btnInfo);
         txtTitle=(TextView)findViewById(R.id.txtTitle1) ;
 
-
         btnGlobe.setOnClickListener(this);
         btnMap.setOnClickListener(this);
         btnHow.setOnClickListener(this);
         btnInfo.setOnClickListener(this);
     }
 
+    // add click events
     public void onClick(View v){
         switch (v.getId()){
             case R.id.btnGlobe:
@@ -74,6 +75,7 @@ public class SettingActivity extends Activity implements View.OnClickListener {
                 startActivity(intent);
                 break;
         }
+        // set Visibility to INVISIBLE after useing click events
         btnGlobe.setVisibility(View.INVISIBLE);
         btnMap.setVisibility(View.INVISIBLE);
         btnHow.setVisibility(View.INVISIBLE);

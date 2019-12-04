@@ -35,6 +35,7 @@ public class Globe {
             float[] vertices = new float[divide*6+6]; //顶点 Vertex coordinates
             float[] texCoords = new float[divide*4+4];//纹理坐标 Texture coordinates
 
+            // Calculate vertex coordinates and texture coordinates
             for(int j = 0; j <= divide; j++) {
                 azimuth = (float)(j * (Math.PI*2) / divide);
 
@@ -60,14 +61,6 @@ public class Globe {
                 texCoords[4*j+2] = j/(float)divide;
                 texCoords[4*j+3] = (i + 1) / (float)divide;
             }
-//            for(int k = 0; k <=divide; k++) {
-//                Log.e("verticesX1",String.valueOf(vertices[6*k+0]));
-//                Log.e("verticesY1",String.valueOf(vertices[6*k+1]));
-//                Log.e("verticesZ1",String.valueOf(vertices[6*k+2]));
-//                Log.e("verticesX2",String.valueOf(vertices[6*k+3]));
-//                Log.e("verticesY2",String.valueOf(vertices[6*k+4]));
-//                Log.e("verticesZ2",String.valueOf(vertices[6*k+5]));
-//            }
 
             // 为存放形状的坐标，初始化顶点字节缓冲 Initialize vertex byte buffer for storing shape coordinates
             ByteBuffer byteBuffer = ByteBuffer.allocateDirect(vertices.length * Float.SIZE);
@@ -76,6 +69,7 @@ public class Globe {
             floatBuffer.put(vertices);//把坐标们加入FloatBuffer中 Add the coordinates to the FloatBuffer
             floatBuffer.position(0);//设置buffer，从第一个坐标开始读 Set buffer to read from the first coordinate
 
+            // Same as vertex coordinates
             ByteBuffer byteBuffer2 = ByteBuffer.allocateDirect(texCoords.length * Float.SIZE);
             byteBuffer2.order(ByteOrder.nativeOrder());
             FloatBuffer floatBuffer2 = byteBuffer2.asFloatBuffer();

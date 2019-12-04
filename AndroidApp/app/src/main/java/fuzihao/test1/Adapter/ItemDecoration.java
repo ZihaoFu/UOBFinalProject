@@ -20,10 +20,12 @@ public class ItemDecoration extends RecyclerView.ItemDecoration {
     private int dataLength;
 
     public ItemDecoration(Context context,int length) {
+        // set background parameters
         dataLength = length;
         dividerPaint = new Paint();
         dividerPaint.setColor(context.getResources().getColor(R.color.colorPrimary));
 
+        // Set text parameters
         textPaint = new TextPaint();
         textPaint.setTypeface(Typeface.DEFAULT_BOLD);
         textPaint.setAntiAlias(true);
@@ -38,6 +40,8 @@ public class ItemDecoration extends RecyclerView.ItemDecoration {
     @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
         super.getItemOffsets(outRect, view, parent, state);
+
+        // set position of title of different sections
         int pos = parent.getChildAdapterPosition(view);
         if(pos==0||pos == dataLength-10){
             outRect.top = topGap;
@@ -57,16 +61,16 @@ public class ItemDecoration extends RecyclerView.ItemDecoration {
         String preGroupId = "";
         String textLine = "";
 
+        // draw title to screen based on the position of photos
         for (int i = 0; i < childCount - 1; i++) {
             View view = parent.getChildAt(i);
             int position = parent.getChildAdapterPosition(view);
 
             preGroupId = groupID;
-            if (position == 0 && dataLength!=10){
+            if (position <dataLength - 10 && dataLength!=10){
                 groupID = "Panoramic Photo";
                 textLine = "Panoramic Photo";
-            }
-            else {
+            }else{
                 groupID = "Normal Photo";
                 textLine = "Normal Photo";
             }

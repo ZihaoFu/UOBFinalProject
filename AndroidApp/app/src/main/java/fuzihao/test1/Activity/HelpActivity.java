@@ -8,7 +8,6 @@ import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -25,14 +24,16 @@ import fuzihao.test1.Adapter.HelpAdapter;
 import fuzihao.test1.R;
 
 public class HelpActivity extends Activity {
-    private ViewPager vpHelp;
+    private ViewPager vpHelp; // Initialize viewpager
+    // Initialize picture for help page
     private int[] resIDs = new int[]{
             R.drawable.help1,
             R.drawable.help2,
             R.drawable.help3,
             R.drawable.help4,
-            R.drawable.help5,};
+            R.drawable.help5};
 
+    // initialize variables
     public static ArrayList<ImageView> imageViewList;
     private LinearLayout linearLayout;
     private ImageView imgPoint;
@@ -43,16 +44,18 @@ public class HelpActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_help);
 
-        initView();//初始化界面控件
-        initData();
-        vpHelp.setAdapter(new HelpAdapter());
+        initView();// Initialize interface controls
+        initData();// Initialize image, scale image size and add click events
+        vpHelp.setAdapter(new HelpAdapter()); //Add adapter to viewpager
     }
 
+    // Initialize interface controls
     private void initView(){
         vpHelp = (ViewPager) findViewById(R.id.vpHelp);
         linearLayout = (LinearLayout) findViewById(R.id.linear);
         imgPoint = (ImageView) findViewById(R.id.imgPoint);
 
+        // add OnPageChangeListener to viewpager
         vpHelp.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
@@ -76,6 +79,7 @@ public class HelpActivity extends Activity {
             }
         });
 
+
         imgPoint.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -91,9 +95,9 @@ public class HelpActivity extends Activity {
         imageViewList = new ArrayList<ImageView>();
         for (int i = 0; i < resIDs.length; i++) {
             final ImageView imageView = new ImageView(this);
-//            imageView.setBackgroundResource(resIDs[i]);
             imageView.setScaleType(ImageView.ScaleType.MATRIX);
 
+            // scale pictures to fit the size of screen
             WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
             int imageWidth = wm.getDefaultDisplay().getWidth();
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(),resIDs[i]);
@@ -105,6 +109,7 @@ public class HelpActivity extends Activity {
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, photoWidth, photoHeight, matrix, true);
             imageView.setImageBitmap(bitmap);
 
+            // add touch event to imageView, Slide down
             imageView.setOnTouchListener(new View.OnTouchListener() {
                 Matrix touchMatrix = new Matrix();
                 Matrix currentMatrix = new Matrix();
@@ -113,27 +118,27 @@ public class HelpActivity extends Activity {
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     switch (motionEvent.getAction()& MotionEvent.ACTION_MASK) {
                         case MotionEvent.ACTION_DOWN:
-                            touchMatrix.set(imageView.getImageMatrix());
-                            startY = motionEvent.getY();
+                            touchMatrix.set(imageView.getImageMatrix()); // Get initial matrix
+                            startY = motionEvent.getY(); // Get initial coordinates
                             break;
                         case MotionEvent.ACTION_MOVE:
-                            float dy = motionEvent.getY() - startY;
+                            float dy = motionEvent.getY() - startY; // Calculate displacement distance
                             currentMatrix.set(touchMatrix);
                             if (Math.abs(dy)>1){
-                                currentMatrix.postTranslate(0,dy);
+                                currentMatrix.postTranslate(0,dy); // translation matrix
                             }
                             break;
                         case MotionEvent.ACTION_UP:
                             startY = motionEvent.getY();
                             PointF p1 = getLeftPointF(currentMatrix,imageView);
                             PointF p2 = getRightPointF(currentMatrix,imageView);
-                            //上下边界复位
+                            //Top and bottom boundary reset
                             if(p2.y-p1.y>imageView.getHeight()){
-                                //上边界复位
+                                //Top boundary reset
                                 if(p1.y>0){
                                     currentMatrix.postTranslate(0,-p1.y);
                                 }
-                                //下边界复位
+                                //bottom boundary reset
                                 if(p2.y<imageView.getHeight()){
                                     currentMatrix.postTranslate(0,imageView.getHeight()-p2.y);
                                 }
@@ -152,36 +157,46 @@ public class HelpActivity extends Activity {
             });
             imageViewList.add(imageView);
 
+            // Set point properties
             ImageView point = new ImageView(this);
             point.setImageResource(R.drawable.pointgray);
 
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
+            // Calculate left margin
             if (i > 0) {
                 layoutParams.leftMargin = 10;
             }
             point.setLayoutParams(layoutParams);
-            linearLayout.addView(point);
+            linearLayout.addView(point); // Add points to layout
         }
     }
 
-    //获取图片的上坐标
+    //Get the top coordinate of the picture
     private PointF getLeftPointF(Matrix matrix, ImageView img){
-        Rect rectTemp = img.getDrawable().getBounds();
+        Rect rectTemp = img.getDrawable().getBounds(); // Get picture boundary
         float[] values = new float[9];
-        matrix.getValues(values);
+        matrix.getValues(values); // Take value from matrix
+        // Calculated coordinates
         float leftX = values[2];
         float leftY = values[5];
         return new PointF(leftX,leftY);
     }
 
-    //获取图片的下坐标
+    //Get the bottom coordinates of the picture
     private PointF getRightPointF(Matrix matrix, ImageView img){
-        Rect rectTemp = img.getDrawable().getBounds();
+        Rect rectTemp = img.getDrawable().getBounds(); // Get picture boundary
         float[] values = new float[9];
-        matrix.getValues(values);
+        matrix.getValues(values); // Take value from matrix
+        // Calculated coordinates
         float leftX = values[2]+rectTemp.width()*values[0];
         float leftY = values[5]+rectTemp.height()*values[4];
         return new PointF(leftX,leftY);
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
+        super.onBackPressed();
     }
 }

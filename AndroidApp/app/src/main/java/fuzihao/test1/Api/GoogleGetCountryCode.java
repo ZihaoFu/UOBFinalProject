@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import static fuzihao.test1.Api.Get.GET;
 
 public class GoogleGetCountryCode {
+    // Use this interface to return data to the activity
     public interface AsyncResponse {
         void onDataReceivedSuccess(String res);
         void onDataReceivedFailed();
@@ -33,6 +34,7 @@ public class GoogleGetCountryCode {
             mContext = context;
         }
 
+        // Generate progress bar
         @Override
         protected void onPreExecute() {
             pd = new ProgressDialog(mContext);
@@ -43,11 +45,13 @@ public class GoogleGetCountryCode {
             pd.show();
         }
 
+        // use GET function to get url
         @Override
         protected String doInBackground(String... urls) {
             return GET(urls[0]);
         }
 
+        //Update progress bar
         @Override
         protected void onProgressUpdate(Integer... values) {
             pd.setIndeterminate(false);
@@ -59,6 +63,8 @@ public class GoogleGetCountryCode {
         protected void onPostExecute(String result) {
             pd.dismiss();
             String countryCode="";
+
+            // Parse the returned json
             try {
                 JSONObject jsonObject = new JSONObject(result);
                 JSONArray results = jsonObject.getJSONArray("results");

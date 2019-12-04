@@ -13,7 +13,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class GoogleGetPhoto {
-
+    // Use this interface to return data to the activity
     public interface AsyncResponse {
         void onDataReceivedSuccess(ArrayList<Bitmap> bitmap);
         void onDataReceivedFailed();
@@ -32,6 +32,7 @@ public class GoogleGetPhoto {
             mContext = context;
         }
 
+        // Generate progress bar
         @Override
         protected void onPreExecute() {
             pd = new ProgressDialog(mContext);
@@ -42,6 +43,7 @@ public class GoogleGetPhoto {
             pd.show();
         }
 
+        // get url
         @Override
         protected ArrayList<Bitmap> doInBackground(String... urls) {
             ArrayList<Bitmap> res = new ArrayList<>();
@@ -66,6 +68,7 @@ public class GoogleGetPhoto {
             return res;
         }
 
+        //Update progress bar
         @Override
         protected void onProgressUpdate(Integer... values) {
             pd.setIndeterminate(false);

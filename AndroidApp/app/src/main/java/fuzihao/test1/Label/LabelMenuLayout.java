@@ -45,11 +45,7 @@ public class LabelMenuLayout extends LinearLayout {
         triangleIndicatorViewDown.setVisibility(GONE);
     }
 
-    /**
-     * 设置弹窗显示位置
-     *
-     * @param isUp true、在上面
-     */
+    // set popup view position
     public void setOrientation(boolean isUp) {
         if (isUp) {
             triangleIndicatorViewUp.setVisibility(GONE);

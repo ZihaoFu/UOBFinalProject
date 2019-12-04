@@ -37,7 +37,6 @@ import static fuzihao.test1.Api.GoogleMapPhotoApi.selectID;
 public class MapActivity extends AppCompatActivity{
 
     private Intent intent;
-    int select;
     String selectString;
     String selectglobe;
 
@@ -69,23 +68,17 @@ public class MapActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
+        //Receive incoming data
         intent = getIntent();
         selectString = intent.getStringExtra("country");
         selectglobe = intent.getStringExtra("globe");
 
-        goToOtherMapList.add("World");
-        goToOtherMapList.add("Asia");
-        goToOtherMapList.add("Europe");
-        goToOtherMapList.add("Africa");
-        goToOtherMapList.add("North America");
-        goToOtherMapList.add("South America");
-        goToOtherMapList.add("Oceania");
-        goToOtherMapList.add("Antarctica");
-
-        initView();
+        initView(); // Initializing various data and interface controls
 
         introduction = selectString;
-        txtIntroduction.setText(introduction);
+        txtIntroduction.setText(introduction); // Set introduction title
+
+        // Special case handling, Used to load maps from the network
         final String introduction1;
         if (introduction.equals("United States")){
             introduction1 = "the-united-states-of-america";
@@ -96,10 +89,15 @@ public class MapActivity extends AppCompatActivity{
         }else{
             introduction1 = introduction.toLowerCase().replaceAll(" ","-");
         }
+
+        // introduction2 is used for Wikipedia links
         String introduction2 = introduction.toLowerCase().replaceAll(" ","_");
+        // introduction3 is used to load local map pic
         String introduction3 = introduction.toLowerCase().replaceAll(" ","");
+        // introduction4 is used to load Wikipedia content to textView
         introduction4 = introduction.replaceAll(" ","_");
 
+        // local map pic id
         final int resid = getResources().getIdentifier("map"+introduction3, "drawable", getPackageName());
         try {
             new Thread(){
@@ -108,14 +106,14 @@ public class MapActivity extends AppCompatActivity{
                     try{
                         Bitmap result;
                         if (resid == 0){
-                            result = get(introduction1);
+                            result = get(introduction1); // load network map
                         }else{
-                            result = BitmapFactory.decodeResource(getResources(), resid);
+                            result = BitmapFactory.decodeResource(getResources(), resid); // load local map
                         }
                         Message msg=Message.obtain();
                         msg.what=0x11;
                         msg.obj=result;
-                        handler.sendMessage(msg);
+                        handler.sendMessage(msg); // send to handler
                     }catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -126,8 +124,9 @@ public class MapActivity extends AppCompatActivity{
             Log.e("err",String.valueOf(e));
         }
 
-        wikiApi();
+        wikiApi(); // use wikiApi to get information from Wikipedia API
 
+        // Generate a link and bind it to the control
         link+=introduction2;
         html = "<a href="+link+">Link to Wikipedia</a>";
         txtLink.setMovementMethod(LinkMovementMethod.getInstance());
@@ -135,11 +134,11 @@ public class MapActivity extends AppCompatActivity{
     }
 
     private Bitmap get(String name) throws Exception {
-        //定义一个url输入流，将图片地址放入
+        //Define a URL input stream and put the image address into the variable
         URL url = new URL("https://geology.com/world/"+name+"-map.gif");
-        //定义一个 InputStream 获取url的输入流（或者直接将url.openStream放入decodeStream解析成bitmap）
+        //Define an InputStream to get the input stream of URL
         InputStream is=url.openStream();
-        Bitmap bitmap = (Bitmap) BitmapFactory.decodeStream(is);
+        Bitmap bitmap = (Bitmap) BitmapFactory.decodeStream(is); // Put the input stream into the decodestream and parse it into bitmap
         is.close();
         return bitmap;
     }
@@ -149,14 +148,17 @@ public class MapActivity extends AppCompatActivity{
         public void handleMessage(Message msg) {
             switch (msg.what){
                 case 0x11:
+                    //Calculate the scale factor based on the resulting image to fit the screen width
                     imageHeight = imgMap.getHeight();
                     imageWidth = imgMap.getWidth();
                     Bitmap result = (Bitmap) msg.obj;
                     mapHeight = result.getHeight();
                     mapWidth = result.getWidth();
-                    mapScale = imageWidth/ (float) mapWidth;
+                    mapScale = imageWidth/ (float) mapWidth; // get scale factor
                     Matrix matrix = new Matrix();
-                    matrix.postScale(mapScale, mapScale);
+                    matrix.postScale(mapScale, mapScale); // apply scale factor to matrix
+
+                    // make the pic can be displayed in the center of the parent view
                     Matrix imgM = imgMap.getImageMatrix();
                     if(mapHeight*mapScale<imageHeight){
                         imgM.postTranslate(0,(imageHeight-(mapHeight*mapScale))/2);
@@ -177,10 +179,12 @@ public class MapActivity extends AppCompatActivity{
     @Override
     public void onBackPressed() {
         finish();
+        super.onBackPressed();
     }
 
-    //wikiapi
+    // call Wikipedia API
     private void wikiApi(){
+        // Handling special situations
         if (introduction.equals("Republic of Macedonia")){
             introduction4 = "North_Macedonia";
         }
@@ -195,7 +199,7 @@ public class MapActivity extends AppCompatActivity{
         getRes.setOnAsyncResponse(new WikiApi.AsyncResponse() {
             @Override
             public void onDataReceivedSuccess(String string) {
-                txtSimple.setText(string);
+                txtSimple.setText(string); // apply the result to the control
             }
             @Override
             public void onDataReceivedFailed() {
@@ -207,6 +211,16 @@ public class MapActivity extends AppCompatActivity{
 
     //Bind controls to variables, Set click listener and touch listener
     private void initView(){
+        // Initializing arrays for sliding switching
+        goToOtherMapList.add("World");
+        goToOtherMapList.add("Asia");
+        goToOtherMapList.add("Europe");
+        goToOtherMapList.add("Africa");
+        goToOtherMapList.add("North America");
+        goToOtherMapList.add("South America");
+        goToOtherMapList.add("Oceania");
+        goToOtherMapList.add("Antarctica");
+
         imgMap = (ImageView) findViewById(R.id.imgMap);
         txtIntroduction = (TextView) findViewById(R.id.txtIntroduction);
         txtSimple = (TextView) findViewById(R.id.txtSimple);
@@ -239,6 +253,7 @@ public class MapActivity extends AppCompatActivity{
         });
     }
 
+    // touch event
     private class Move implements View.OnTouchListener {
         private Matrix matrix = new Matrix();
         private PointF startPoint = new PointF();
@@ -261,6 +276,7 @@ public class MapActivity extends AppCompatActivity{
                     startTime = System.currentTimeMillis();
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    // scale the map
                     if (mode == ZOOM) {
                         float[] values = new float[9];
                         float newDist = distance(motionEvent);
@@ -291,7 +307,9 @@ public class MapActivity extends AppCompatActivity{
                     endTime = System.currentTimeMillis();
                     if ((endTime - startTime) < 0.1 * 1000L) {
                         try {
+                            // click event to access to the photo wall activity
                             if (selectglobe.equals("click")) {
+                                // get photo reference from Google Map API
                                 final String apiKey = "AIzaSyBbmKXXOLKFsICWeJkFWtp4Z9Jy9RtljX4";
 
                                 selectID = 0;
@@ -320,23 +338,23 @@ public class MapActivity extends AppCompatActivity{
                     PointF p1 = getLeftPointF(currentMatrix);
                     PointF p2 = getRightPointF(currentMatrix);
 
-                    //左边界复位
+                    //Left boundary reset
                     if(p1.x>0){
                         currentMatrix.postTranslate(-p1.x,0);
                     }
 
-                    //右边界复位
+                    //Right boundary reset
                     if(p2.x<imgMap.getWidth()){
                         currentMatrix.postTranslate(imgMap.getWidth()-p2.x,0);
                     }
 
-                    //上下边界复位
+                    //Top and bottom boundary reset
                     if(p2.y-p1.y>imgMap.getHeight()){
-                        //上边界复位
+                        //Top boundary reset
                         if(p1.y>0){
                             currentMatrix.postTranslate(0,-p1.y);
                         }
-                        //下边界复位
+                        //Bottom boundary reset
                         if(p2.y<imgMap.getHeight()){
                             currentMatrix.postTranslate(0,imgMap.getHeight()-p2.y);
                         }
@@ -349,7 +367,7 @@ public class MapActivity extends AppCompatActivity{
                     if(goToOtherMapList.contains(txtIntroduction.getText().toString())){
                         int positon = goToOtherMapList.indexOf(txtIntroduction.getText().toString());
 
-                        //拉过一半时操作前往上一张图像
+                        //Image moves to the previous image as it slides half the screen to the left
                         if(p1.x>imgMap.getWidth()/2){
                             if(positon==0){
                                 intent = new Intent(MapActivity.this,MapActivity.class);
@@ -365,7 +383,7 @@ public class MapActivity extends AppCompatActivity{
                             }
                         }
 
-                        //拉过一半时操作前往下一张图像
+                        //Image moves to the next image as it slides right the screen to the left
                         if(p2.x<imgMap.getWidth()/2){
                             if(positon==7){
                                 intent = new Intent(MapActivity.this,MapActivity.class);
@@ -418,7 +436,7 @@ public class MapActivity extends AppCompatActivity{
         return new PointF(midX/2,midY/2);
     }
 
-    //获取图片的上坐标
+    //Get the top coordinate of the picture
     private PointF getLeftPointF(Matrix matrix){
         Rect rectTemp = imgMap.getDrawable().getBounds();
         float[] values = new float[9];
@@ -428,7 +446,7 @@ public class MapActivity extends AppCompatActivity{
         return new PointF(leftX,leftY);
     }
 
-    //获取图片的下坐标
+    //Get the bottom coordinates of the picture
     private PointF getRightPointF(Matrix matrix){
         Rect rectTemp = imgMap.getDrawable().getBounds();
         float[] values = new float[9];

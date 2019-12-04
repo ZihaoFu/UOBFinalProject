@@ -12,8 +12,9 @@ import static fuzihao.test1.Model.VrSphere.radius;
 public class VrSphereRender implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        radius = 2f;
-        vrSphere.create();
+        radius = 2f; // set radius of sphere
+        vrSphere.create(); // create sphere
+        // enable the function of openGL
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glEnable(GLES20.GL_CULL_FACE);
         GLES20.glCullFace(GLES20.GL_FRONT);
@@ -29,6 +30,6 @@ public class VrSphereRender implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT|GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glClearColor(1,1,1,1);
-        vrSphere.draw();
+        vrSphere.draw(); // draw the sphere to screen
     }
 }

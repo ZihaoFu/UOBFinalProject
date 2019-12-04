@@ -6,8 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import java.util.ArrayList;
-
 import static fuzihao.test1.Activity.HelpActivity.imageViewList;
 
 public class HelpAdapter extends PagerAdapter {

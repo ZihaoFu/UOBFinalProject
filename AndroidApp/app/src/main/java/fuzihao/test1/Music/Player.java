@@ -9,7 +9,9 @@ import static fuzihao.test1.Music.FloatingMusicPlayerService.btnMusic;
 
 public class Player implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
     public MediaPlayer mediaPlayer;
+
     public Player(){
+        //Initialize the player and set some parameters
         try {
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -19,30 +21,33 @@ public class Player implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCom
         }
     }
 
+    // play media
     public void play(){
         mediaPlayer.start();
     }
 
-    public void playUrl(String videoUrl) {
+    public void playUrl(String musicUrl) {
         try {
             mediaPlayer.reset();
-            mediaPlayer.setDataSource(videoUrl);
-            mediaPlayer.prepare();//prepare之后自动播放
+            mediaPlayer.setDataSource(musicUrl); // set media data URL
+            mediaPlayer.prepare();//Play automatically after prepare
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
-                    btnMusic.setImageResource(R.drawable.musicplay);
+                    btnMusic.setImageResource(R.drawable.musicplay); // set Initial icon
                 }
             });
         } catch (Exception e) {
         }
     }
 
+    // pause media
     public void pause()
     {
         mediaPlayer.pause();
     }
 
+    // stop media
     public void stop() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
@@ -51,6 +56,7 @@ public class Player implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCom
         }
     }
 
+    //Play automatically after prepare
     @Override
     public void onPrepared(MediaPlayer arg0) {
         arg0.start();

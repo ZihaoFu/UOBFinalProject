@@ -46,9 +46,13 @@ public class SelectActivity extends Activity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select);
-        initView();
+        initView(); // Initialize all interface variables
+
+        // get input data
         Intent intent = getIntent();
         int requestCode= intent.getIntExtra("num",0);
+
+        //Determine what controls are displayed and not displayed according to the input data
         if(requestCode==0){
             btnWorldMap.setVisibility(View.INVISIBLE);
             btnAsia.setVisibility(View.INVISIBLE);
@@ -101,6 +105,7 @@ public class SelectActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    // Initialize all interface variables
     private void initView(){
         btnGeo = (Button) findViewById(R.id.btnGeo);
         btnContinent = (Button) findViewById(R.id.btnContinent);
@@ -149,6 +154,7 @@ public class SelectActivity extends Activity implements View.OnClickListener {
         imgLogo8.setOnClickListener(this);
     }
 
+    // add click events for each control
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -217,42 +223,42 @@ public class SelectActivity extends Activity implements View.OnClickListener {
                 startActivity(intent);
                 break;
             case R.id.imgLogo1:
-                uri = Uri.parse("https://iconmonstr.com/");    //设置跳转的网站
+                uri = Uri.parse("https://iconmonstr.com/");//Set the URL of the website
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
             case R.id.imgLogo2:
-                uri = Uri.parse("http://ontheworldmap.com/");    //设置跳转的网站
+                uri = Uri.parse("http://ontheworldmap.com/");
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
             case R.id.imgLogo3:
-                uri = Uri.parse("https://geology.com/world/");    //设置跳转的网站
+                uri = Uri.parse("https://geology.com/world/");
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
             case R.id.imgLogo4:
-                uri = Uri.parse("https://www.countryflags.io/");    //设置跳转的网站
+                uri = Uri.parse("https://www.countryflags.io/");
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
             case R.id.imgLogo5:
-                uri = Uri.parse("http://www.nationalanthems.info/");    //设置跳转的网站
+                uri = Uri.parse("http://www.nationalanthems.info/");
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
             case R.id.imgLogo6:
-                uri = Uri.parse("https://rapidapi.com/");    //设置跳转的网站
+                uri = Uri.parse("https://rapidapi.com/");
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
             case R.id.imgLogo7:
-                uri = Uri.parse("https://developers.google.com/places/web-service/intro");    //设置跳转的网站
+                uri = Uri.parse("https://developers.google.com/places/web-service/intro");
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
             case R.id.imgLogo8:
-                uri = Uri.parse("https://www.mediawiki.org/wiki/API:Main_page");    //设置跳转的网站
+                uri = Uri.parse("https://www.mediawiki.org/wiki/API:Main_page");
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;

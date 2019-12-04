@@ -3,7 +3,6 @@ package fuzihao.test1.Model;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
@@ -19,12 +18,10 @@ import static android.content.ContentValues.TAG;
 import static fuzihao.test1.BuildConfig.DEBUG;
 
 public class VrSphere {
-    private static final float UNIT_SIZE = 1f;// 单位尺寸
-    public static float radius;
-//    private float radius = 2f; // 球的半径
+    public static float radius; // Sphere radius
 
-    final double angleSpan = Math.PI/90f;// 将球进行单位切分的角度
-    int vCount = 0;// 顶点个数，先初始化为0
+    final double angleSpan = Math.PI/90f;// The angle at which the sphere is unit-divided
+    int vCount = 0;// Number of vertices, initialized to 0
 
     private Resources resources;
 
@@ -57,7 +54,7 @@ public class VrSphere {
     }
 
     public void create(){
-        mHProgram=createGlProgramByRes(resources, "vrsphere.vert", "vrsphere.frag");
+        mHProgram=createGlProgramByRes(resources, "vrsphere.vert", "vrsphere.frag"); // Load shader
         mHProjMatrix= GLES20.glGetUniformLocation(mHProgram,"uProjMatrix");
         mHViewMatrix=GLES20.glGetUniformLocation(mHProgram,"uViewMatrix");
         mHModelMatrix=GLES20.glGetUniformLocation(mHProgram,"uModelMatrix");
@@ -70,15 +67,15 @@ public class VrSphere {
     }
 
     public void setSize(int width,int height){
-        //计算宽高比
+        //Calculate the width to height ratio
         float ratio=(float)width/height;
-        //设置透视投影
+        //Set perspective projection
         //Matrix.frustumM(mProjectMatrix, 0, -ratio*skyRate, ratio*skyRate, -1*skyRate, 1*skyRate, 1, 200);
-        //透视投影矩阵/视锥
+        //Perspective projection matrix
         perspectiveM(mProjectMatrix,0,45,ratio,1f,300);
-        //设置相机位置
+        //Set camera position
         Matrix.setLookAtM(mViewMatrix, 0, 0f, 0.0f,0.0f, 0.0f, 0.0f,-1.0f, 0f,1.0f, 0.0f);
-        //模型矩阵
+        //Model matrix
         Matrix.setIdentityM(mModelMatrix,0);
         //Matrix.scaleM(mModelMatrix,0,2,2,2);
     }
@@ -167,11 +164,11 @@ public class VrSphere {
                 float t0 = (float) (vAngle / Math.PI);
                 float t1 = (float) ((vAngle + angleSpan) / Math.PI);
 
-                textureVertix.add(s1);// x1 y1对应纹理坐标
+                textureVertix.add(s1);// x1 y1对应纹理坐标 x1 y1 texture coordinates
                 textureVertix.add(t0);
-                textureVertix.add(s0);// x0 y0对应纹理坐标
+                textureVertix.add(s0);// x0 y0对应纹理坐标 x0 y0 texture coordinates
                 textureVertix.add(t0);
-                textureVertix.add(s0);// x3 y3对应纹理坐标
+                textureVertix.add(s0);// x3 y3对应纹理坐标 x3 y3 texture coordinates
                 textureVertix.add(t1);
 
                 alVertix.add(x1);
@@ -184,11 +181,11 @@ public class VrSphere {
                 alVertix.add(y2);
                 alVertix.add(z2);
 
-                textureVertix.add(s1);// x1 y1对应纹理坐标
+                textureVertix.add(s1);// x1 y1对应纹理坐标 x1 y1 texture coordinates
                 textureVertix.add(t0);
-                textureVertix.add(s0);// x3 y3对应纹理坐标
+                textureVertix.add(s0);// x3 y3对应纹理坐标 x3 y3 texture coordinates
                 textureVertix.add(t1);
-                textureVertix.add(s1);// x2 y3对应纹理坐标
+                textureVertix.add(s1);// x2 y3对应纹理坐标 x2 y3 texture coordinates
                 textureVertix.add(t1);
             }
         }
@@ -215,7 +212,7 @@ public class VrSphere {
         return createGlProgram(uRes(res,vert),uRes(res,frag));
     }
 
-    //创建GL程序
+    //Create a GL program
     public static int createGlProgram(String vertexSource, String fragmentSource){
         int vertex=loadShader(GLES20.GL_VERTEX_SHADER,vertexSource);
         if(vertex==0)return 0;
@@ -237,7 +234,7 @@ public class VrSphere {
         return program;
     }
 
-    //加载shader
+    //Load shader
     public static int loadShader(int shaderType,String source){
         int shader= GLES20.glCreateShader(shaderType);
         if(0!=shader){
@@ -261,7 +258,7 @@ public class VrSphere {
         }
     }
 
-    //通过路径加载Assets中的文本内容
+    //Load text content in Assets by path
     public static String uRes(Resources mRes,String path){
         StringBuilder result=new StringBuilder();
         try{
@@ -280,19 +277,24 @@ public class VrSphere {
     private int createTexture(){
         int[] texture=new int[1];
         if(bitmap!=null&&!bitmap.isRecycled()){
-            //生成纹理
+            //Generate texture
             GLES20.glGenTextures(1,texture,0);
-            //生成纹理
+            //Bind texture
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,texture[0]);
             //设置缩小过滤为使用纹理中坐标最接近的一个像素的颜色作为需要绘制的像素颜色
+            //Set the reduction filter to use the color of the closest pixel in the texture as the pixel color to be drawn
             GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,GLES20.GL_NEAREST);
             //设置放大过滤为使用纹理中坐标最接近的若干个颜色，通过加权平均算法得到需要绘制的像素颜色
+            //Set the zoom filter to use the colors with the closest coordinates in the texture, and use the weighted average algorithm to get the pixel color to be drawn
             GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,GLES20.GL_TEXTURE_MAG_FILTER,GLES20.GL_LINEAR);
             //设置环绕方向S，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
+            //Set the surround direction S and intercept the texture coordinates to [1 / 2n, 1-1 / 2n]. Will result in never merging with borders
             GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,GLES20.GL_CLAMP_TO_EDGE);
             //设置环绕方向T，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
+            //Set the wrapping direction T and intercept the texture coordinates to [1 / 2n, 1-1 / 2n]. Will result in never merging with borders
             GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,GLES20.GL_CLAMP_TO_EDGE);
             //根据以上指定的参数，生成一个2D纹理
+            //Generate a 2D texture based on the parameters specified above
             GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
             return texture[0];
         }

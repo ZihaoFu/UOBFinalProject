@@ -42,12 +42,12 @@ public class LabelMenu {
 
     private List<MenuItem> menuItemList;
 
-    //指示器与菜单布局两侧的最小间距
+    //Minimum distance between indicator and menu layout
     private int indicatorToContainerMinMargin;
     private int horizontalMargin = 10;
     private int iconTextMargin = 10;
 
-    //距离屏幕的间距
+    //Distance from screen
     private int marginScreen;
     private int screenWidth;
     private int screenHeight;
@@ -76,6 +76,7 @@ public class LabelMenu {
         create();
     }
 
+    //Initialize variables
     private void init(){
         indicatorToContainerMinMargin = dip2px(mContext,MIN_MARGIN_linearLayout);
         marginScreen = dip2px(mContext,MARGIN_SCREEN);
@@ -177,15 +178,12 @@ public class LabelMenu {
     public void setBackgroundColor(int color) {
         labelMenuLayout.setBackgroundColor(color);
     }
-    /**
-     * 设置箭头颜色
-     *
-     * @param color
-     */
+    // Set Triangle Indicator arrow colour
     public void setTriangleIndicatorViewColor(int color) {
         labelMenuLayout.setTriangleIndicatorViewColor(color);
     }
 
+    // set item text colour
     public void setItemTextColor(int color) {
         itemTextColor = color;
     }
@@ -268,40 +266,40 @@ public class LabelMenu {
         LinearLayout.LayoutParams containerParams = (LinearLayout.LayoutParams) linearLayout.getLayoutParams();
         containerParams.width = width;
 
-        if (leftMargin < rightMargin) {//在左侧
-            if (leftMargin >= containerViewHalfWidth) {//显示在中间
+        if (leftMargin < rightMargin) {//in the left
+            if (leftMargin >= containerViewHalfWidth) {//Show in the middle
                 upIndicatorParams.leftMargin = centerX - indicatorViewHalfWidth;
                 containerParams.leftMargin = centerX - containerViewHalfWidth;
             } else {
                 upIndicatorParams.leftMargin = centerX - indicatorViewHalfWidth;
                 containerParams.leftMargin = marginScreen;
                 if (upIndicatorParams.rightMargin > containerParams.rightMargin - indicatorToContainerMinMargin
-                        && width <= screenWidth / 2) {//矫正箭头在列表右边
+                        && width <= screenWidth / 2) {//Correction arrow to the right of the list
                     int newLeftMargin = upIndicatorParams.leftMargin - indicatorToContainerMinMargin;
                     if (newLeftMargin >= marginScreen) {
                         containerParams.leftMargin = newLeftMargin;
                     }
                 }
             }
-        } else if (leftMargin > rightMargin) {//在右侧
+        } else if (leftMargin > rightMargin) {//in the right
             if (rightMargin >= containerViewHalfWidth) {
                 upIndicatorParams.leftMargin = centerX - indicatorViewHalfWidth;
                 containerParams.leftMargin = centerX - containerViewHalfWidth;
             } else {
                 upIndicatorParams.leftMargin = centerX - indicatorViewHalfWidth;
                 containerParams.leftMargin = screenWidth - containerViewHalfWidth * 2 - marginScreen;
-                if (upIndicatorParams.leftMargin < containerParams.leftMargin + indicatorToContainerMinMargin) {//矫正箭头在列表左边
+                if (upIndicatorParams.leftMargin < containerParams.leftMargin + indicatorToContainerMinMargin) {//Correction arrow to the left of the list
                     containerParams.leftMargin = upIndicatorParams.leftMargin - indicatorToContainerMinMargin;
                 }
             }
-        } else {//在中间
+        } else {//in the middle
             int left = centerX - indicatorViewHalfWidth;
             int right = centerX - containerViewHalfWidth;
             upIndicatorParams.leftMargin = left;
             containerParams.leftMargin = right;
         }
 
-        if (upIndicatorParams.leftMargin <= 0) {//校正三角形指示器的边界超过范围
+        if (upIndicatorParams.leftMargin <= 0) {//Correction of the bounds of the triangle indicator over the range
             upIndicatorParams.leftMargin = marginScreen + indicatorToContainerMinMargin;
         } else if (upIndicatorParams.leftMargin + indicatorViewHalfWidth * 2 >= screenWidth) {
             upIndicatorParams.leftMargin = screenWidth - indicatorViewHalfWidth * 2 - marginScreen - indicatorToContainerMinMargin;
@@ -318,17 +316,14 @@ public class LabelMenu {
         mOnDismissListener = listener;
     }
 
-    /***
-     * 设置添加屏幕的背景透明度* @param bgAlpha
-     */
+    // set Background Alpha
     private void setBackgroundAlpha(float bgAlpha) {
         WindowManager.LayoutParams lp = ((Activity) mContext).getWindow().getAttributes();
         lp.alpha = bgAlpha;
         ((Activity) mContext).getWindow().setAttributes(lp);
     }
-    /**
-     * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
-     */
+
+    // Convert dp to px
     private int dip2px(Context context, float dpValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
@@ -418,7 +413,7 @@ public class LabelMenu {
                 holder.textTv.setTextColor(itemTextColor);
             }
 
-            //根据最长文字调整总宽度
+            //Adjust total width based on longest text
             boolean iconIsGone = holder.iconIv.getVisibility() == View.GONE;
             if (position == 0) {
                 width = maxTextWidth + horizontalMargin * 2;

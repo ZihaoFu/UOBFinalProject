@@ -38,6 +38,7 @@ public class VRActivity extends AppCompatActivity implements SensorEventListener
 
     private Intent intent;
     String select;
+    int selectNum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,10 +48,10 @@ public class VRActivity extends AppCompatActivity implements SensorEventListener
         try{
             sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
             List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
-            //判断是否存在rotation vector sensor
-
+            //Determine if there is a rotation vector sensor
             rotation = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
+            // set opengl es parameters
             glSurfaceView = (GLSurfaceView) findViewById(R.id.gl_content);
             glSurfaceView.setEGLContextClientVersion(2);
             glSurfaceView.setRenderer(new VrSphereRender());
@@ -58,25 +59,13 @@ public class VRActivity extends AppCompatActivity implements SensorEventListener
 
             intent = getIntent();
             select = intent.getStringExtra("vr");
-            //fr
-            if (select.equals("France")){
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.france360);
-            }
-            //uk
-            if(select.equals("United Kingdom")){
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama01);
-            }
-            //ru
-            if(select.equals("Russia")){
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama02);
-            }
-            //us
-            if(select.equals("United States")){
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama03);
-            }
-            //cn
-            if(select.equals("China")){
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.panorama04);
+            selectNum = intent.getIntExtra("pos",0);
+
+            // set texture bitmap
+            if (select.equals("France")||select.equals("United Kingdom")||select.equals("Russia")||select.equals("United States")||select.equals("China")){
+                select = select.toLowerCase().replaceAll(" ","");
+                int id = getResources().getIdentifier("p"+select+selectNum, "drawable", getPackageName());
+                bitmap = BitmapFactory.decodeResource(getResources(), id);
             }
             vrSphere = new VrSphere(this.getApplicationContext(),bitmap);
             if (sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) == null){
@@ -103,9 +92,15 @@ public class VRActivity extends AppCompatActivity implements SensorEventListener
     }
 
     @Override
+    public void onBackPressed() {
+        finish();
+        super.onBackPressed();
+    }
+
+    @Override
     public void onSensorChanged(SensorEvent event) {
-        SensorManager.getRotationMatrixFromVector(rotationMatrix,event.values);
-        vrSphere.setMatrix(rotationMatrix);
+        SensorManager.getRotationMatrixFromVector(rotationMatrix,event.values); // get rotation matrix
+        vrSphere.setMatrix(rotationMatrix); // apply matrix to model
     }
 
     @Override

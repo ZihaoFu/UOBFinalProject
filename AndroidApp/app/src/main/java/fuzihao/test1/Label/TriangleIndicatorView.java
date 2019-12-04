@@ -9,10 +9,7 @@ import android.view.View;
 
 import fuzihao.test1.R;
 
-/**
- * 三角形指示器
- * Created by Zihao Fu on 2019/11/07.
- */
+// Triangle Indicator
 public class TriangleIndicatorView extends View {
     private int width = 16;
     private int height = 8;
@@ -44,16 +41,16 @@ public class TriangleIndicatorView extends View {
 
         Path path = new Path();
         if (isUp) {
-            path.moveTo(width / 2, 0);// 此点为多边形的起点
+            path.moveTo(width / 2, 0);// This point is the starting point of the polygon
             path.lineTo(0, height);
             path.lineTo(width, height);
         } else {
-            path.moveTo(0, 0);// 此点为多边形的起点
+            path.moveTo(0, 0);// This point is the starting point of the polygon
             path.lineTo(width, 0);
             path.lineTo(width / 2, height);
         }
 
-        path.close(); // 使这些点构成封闭的多边形
+        path.close(); // Make these points a closed polygon
         canvas.drawPath(path, p);
 
     }
@@ -77,11 +74,7 @@ public class TriangleIndicatorView extends View {
         invalidate();
     }
 
-    /**
-     * 设置方向
-     *
-     * @param newIsUp 是否向上
-     */
+    //Set direction
     public void setOrientation(boolean newIsUp) {
         isUp = newIsUp;
     }

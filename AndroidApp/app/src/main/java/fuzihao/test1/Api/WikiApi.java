@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import static fuzihao.test1.Api.Get.GET;
 
 public class WikiApi{
-
+    // Use this interface to return data to the activity
     public interface AsyncResponse {
         void onDataReceivedSuccess(String string);
         void onDataReceivedFailed();
@@ -30,6 +30,7 @@ public class WikiApi{
             mContext = context;
         }
 
+        // Generate progress bar
         @Override
         protected void onPreExecute() {
             pd = new ProgressDialog(mContext);
@@ -40,11 +41,13 @@ public class WikiApi{
             pd.show();
         }
 
+        // use GET function to get url
         @Override
         protected String doInBackground(String... urls) {
             return GET(urls[0]);
         }
 
+        //Update progress bar
         @Override
         protected void onProgressUpdate(Integer... values) {
             pd.setIndeterminate(false);
@@ -57,6 +60,8 @@ public class WikiApi{
         protected void onPostExecute(String result) {
             pd.dismiss();
             String wikiText="";
+
+            // Parse the returned json
             try {
                 JSONObject json = new JSONObject(result); // convert String to JSONObject
                 JSONObject query = json.getJSONObject("query");

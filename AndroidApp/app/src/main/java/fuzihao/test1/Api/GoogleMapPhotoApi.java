@@ -10,8 +10,8 @@ import static fuzihao.test1.Api.Get.GET;
 
 public class GoogleMapPhotoApi {
     public static int selectID = 0;
-    public static String countryName = "";
 
+    // Use this interface to return data to the activity
     public interface AsyncResponse {
         void onDataReceivedSuccess(String string);
         void onDataReceivedFailed();
@@ -24,6 +24,7 @@ public class GoogleMapPhotoApi {
             this.asyncResponse = asyncResponse;
         }
 
+        // use GET function to get url
         @Override
         protected String doInBackground(String... urls) {
             return GET(urls[0]);
@@ -32,6 +33,8 @@ public class GoogleMapPhotoApi {
         @Override
         protected void onPostExecute(String result) {
             String photoRef = "";
+
+            // Parse the returned json
             try {
                 if (selectID == 0) {
                     JSONObject jsonObject = new JSONObject(result);
