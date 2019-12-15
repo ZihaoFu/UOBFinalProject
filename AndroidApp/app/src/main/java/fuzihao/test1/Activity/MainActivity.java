@@ -59,6 +59,7 @@ import fuzihao.test1.R;
 import static fuzihao.test1.Model.GlobeRender.latitude;
 import static fuzihao.test1.Model.GlobeRender.longitude;
 import static fuzihao.test1.Music.FloatingMusicPlayerService.btnMusic;
+import static fuzihao.test1.Music.FloatingMusicPlayerService.txtMusic;
 
 public class MainActivity extends AppCompatActivity implements View.OnTouchListener, AdapterView.OnItemSelectedListener {
     public static GLSurfaceView glsv_content;
@@ -213,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         if (FloatingMusicPlayerService.isStarted) {
             FloatingMusicPlayerService.isStarted = false;
             FloatingMusicPlayerService.windowManager.removeView(btnMusic);
+            FloatingMusicPlayerService.windowManager.removeView(txtMusic);
             FloatingMusicPlayerService.player.stop();
             // Open New Button
             FloatingMusicPlayerService.player = new Player();
@@ -261,6 +263,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             try{
                 // close floating button and database
                 FloatingMusicPlayerService.windowManager.removeView(btnMusic);
+                FloatingMusicPlayerService.windowManager.removeView(txtMusic);
                 db.close();
             }catch (Exception e){
 

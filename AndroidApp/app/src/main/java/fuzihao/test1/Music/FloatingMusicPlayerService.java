@@ -9,10 +9,13 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import fuzihao.test1.R;
 
@@ -21,8 +24,10 @@ public class FloatingMusicPlayerService extends Service {
 
     public static WindowManager windowManager;
     private WindowManager.LayoutParams layoutParams;
+    private WindowManager.LayoutParams layoutParams2;
 
     public static ImageButton btnMusic;
+    public static TextView txtMusic;
 
     private long startTime = 0;
     private long endTime = 0;
@@ -81,6 +86,13 @@ public class FloatingMusicPlayerService extends Service {
         isStarted = true;
 
         if (Settings.canDrawOverlays(this)) {
+            // add text to describe current country
+            txtMusic = new TextView(getApplicationContext());
+            txtMusic.setText(selectCode.toUpperCase());
+            txtMusic.setTextColor(getColor(R.color.colorPrimary));
+            windowManager.addView(txtMusic, layoutParams); // add floating button to view
+
+            // play button
             btnMusic = new ImageButton(getApplicationContext());
             btnMusic.setImageDrawable(getDrawable(R.drawable.musicplay)); // set Initial icon
             btnMusic.setBackgroundColor(Color.TRANSPARENT);// set floating button colour
@@ -119,6 +131,7 @@ public class FloatingMusicPlayerService extends Service {
                     layoutParams.x = layoutParams.x + movedX;
                     layoutParams.y = layoutParams.y + movedY;
                     windowManager.updateViewLayout(view, layoutParams);
+                    windowManager.updateViewLayout(txtMusic, layoutParams);
                     break;
                 case MotionEvent.ACTION_UP:
                     endTime = System.currentTimeMillis();
@@ -127,6 +140,7 @@ public class FloatingMusicPlayerService extends Service {
                         if (isPlay%2==0){
                             btnMusic.setImageDrawable(getDrawable(R.drawable.musicstop)); // switch icon
                             if(isPlay==0){
+                                selectCode = selectCode.toLowerCase();
                                 player.playUrl("http://www.nationalanthems.info/"+selectCode+".mp3"); // set music URL
                             }else{
                                 player.play();
@@ -140,6 +154,7 @@ public class FloatingMusicPlayerService extends Service {
                     // close floating button
                     else if((endTime - startTime) >= 2 * 1000L && layoutParams.x-originX < 1 && layoutParams.y-originY < 1){
                         windowManager.removeView(btnMusic);
+                        windowManager.removeView(txtMusic);
                         player.stop();
                         isStarted = false;
                     }
